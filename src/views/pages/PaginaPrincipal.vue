@@ -27,27 +27,9 @@ import MenuNavegacion from './LandingPages/MenuNavegacion.vue';
             <!--Redes sociales-->
             <RedesSociales></RedesSociales>
 
-            <!--Inicio-->
-            <!--<Inicio></Inicio>-->
-
-            <!--Contacto-->
-            <!--<Contacto></Contacto>-->
-
             <!--Separador-->
             <Separador></Separador>
-
             <router-view></router-view>
-
-            <!--<SobreNosotros></SobreNosotros>
-            <Adminisiones></Adminisiones>
-            <Academia></Academia>
-            <NoticiasEventos></NoticiasEventos>
-            <Galeria></Galeria>
-            <Blog></Blog>
-            <Biblioteca></Biblioteca>
-            <Alumnos></Alumnos>
-            <Padres></Padres>-->
-
             <Footer></Footer>
         </div>
     </div>

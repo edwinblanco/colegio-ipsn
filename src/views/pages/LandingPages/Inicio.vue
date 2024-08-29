@@ -56,8 +56,19 @@ function smoothScroll(id) {
                 "
             >
                 <span class="font-light block text-lg md:text-xl lg:text-2xl"></span>
-                Instituto de Promoción Social del Norte de Bucaramanga
+                INSTITUCIÓN EDUCATIVA PROMOCION SOCIAL DEL NORTE
             </h1>
+            <p
+                class="font-normal text-lg md:text-xl lg:text-2xl leading-normal md:mt-4 text-gray-200 relative"
+                style="
+                    text-shadow:
+                        0 0 10px rgba(255, 255, 255, 0.9),
+                        0 0 20px rgba(255, 255, 255, 1),
+                        0 0 30px rgba(255, 255, 255, 0.4);
+                "
+            >
+                “COMPROMISO, SERVICIO Y TRABAJO”
+            </p>
             <p
                 class="font-normal text-lg md:text-xl lg:text-2xl leading-normal md:mt-4 text-gray-200 relative"
                 style="
@@ -129,31 +140,35 @@ function smoothScroll(id) {
         <div class="w-full lg:w-3/4">
             <h2 class="text-5xl font-bold text-green-800 leading-tight mb-12">Principios y Valores</h2>
             <div class="flex flex-wrap justify-center gap-6">
-                <!-- Tarjeta de Responsabilidad -->
+                <!-- Tarjeta de COMPROMISO -->
                 <div class="relative group overflow-hidden rounded-lg shadow-lg bg-white p-6 w-full sm:w-80 hover:bg-green-200 transition-all duration-300">
                     <div class="absolute top-0 left-0 w-full h-1 bg-green-800"></div>
                     <div class="absolute bottom-0 right-0 w-full h-1 bg-green-800"></div>
                     <div class="relative flex flex-col items-center space-y-4">
-                        <h3 class="text-3xl font-bold text-green-800 mb-4">Responsabilidad</h3>
+                        <h3 class="text-3xl font-bold text-green-800 mb-4">COMPROMISO</h3>
                         <p class="font-normal text-lg text-green-800">Manifestado en el cumplimiento de los compromisos adquiridos consigo mismo y con los demás.</p>
                     </div>
                 </div>
-                <!-- Tarjeta de Servicio -->
+
+                <!-- Tarjeta de SERVICIO -->
                 <div class="relative group overflow-hidden rounded-lg shadow-lg bg-white p-6 w-full sm:w-80 hover:bg-green-200 transition-all duration-300">
                     <div class="absolute top-0 left-0 w-full h-1 bg-green-800"></div>
                     <div class="absolute bottom-0 right-0 w-full h-1 bg-green-800"></div>
                     <div class="relative flex flex-col items-center space-y-4">
-                        <h3 class="text-3xl font-bold text-green-800 mb-4">Servicio</h3>
-                        <p class="font-normal text-lg text-green-800">Manifestado en el respaldo solidario hacia la necesidad ajena y el mejoramiento de su entorno.</p>
+                        <h3 class="text-3xl font-bold text-green-800 mb-4">SERVICIO</h3>
+                        <p class="font-normal text-lg text-green-800">Manifestado en el respaldo solidario hacia la necesidad ajena, el mejoramiento de su entorno y el cuidado del medio ambiente.</p>
                     </div>
                 </div>
-                <!-- Tarjeta de Trabajo -->
+
+                <!-- Tarjeta de TRABAJO -->
                 <div class="relative group overflow-hidden rounded-lg shadow-lg bg-white p-6 w-full sm:w-80 hover:bg-green-200 transition-all duration-300">
                     <div class="absolute top-0 left-0 w-full h-1 bg-green-800"></div>
                     <div class="absolute bottom-0 right-0 w-full h-1 bg-green-800"></div>
                     <div class="relative flex flex-col items-center space-y-4">
-                        <h3 class="text-3xl font-bold text-green-800 mb-4">Trabajo</h3>
-                        <p class="font-normal text-lg text-green-800">Manifestado en el cumplimiento de sus compromisos y el esfuerzo permanente para superar las dificultades.</p>
+                        <h3 class="text-3xl font-bold text-green-800 mb-4">TRABAJO</h3>
+                        <p class="font-normal text-lg text-green-800">
+                            Manifestado el cumplimiento de su labor de acuerdo al rol que desempeña en la comunidad educativa y el esfuerzo permanente para lograr el conocimiento, superar las dificultades y mejorar su propio desempeño.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -187,7 +202,8 @@ function smoothScroll(id) {
             <div class="flex flex-col w-full p-8 bg-white shadow-lg rounded-lg transition-transform duration-500 hover:scale-105 hover:shadow-2xl">
                 <h2 class="text-5xl font-bold text-green-800 leading-tight mb-6 transition-transform duration-500 hover:scale-105 hover:text-green-900">Nuestra Misión</h2>
                 <p class="font-normal text-2xl leading-normal text-green-600 transition-transform duration-500 hover:scale-105 hover:text-green-700">
-                    Brindar una educación integral y de calidad, fomentando el desarrollo académico, personal y social de nuestros estudiantes, para que sean ciudadanos comprometidos y capacitados para enfrentar los retos del futuro.
+                    La IEPSN desarrolla una educación incluyente, de calidad, que permite a los estudiantes, adquirir una formación académico-técnica, basada en valores, orientada a mejorar sus condiciones de vida y las de su comunidad incentivando
+                    el autoconocimiento y desarrollo de la autonomía.
                 </p>
             </div>
             <!-- Imagen alusiva a la misión -->
@@ -224,7 +240,8 @@ function smoothScroll(id) {
             <div class="flex flex-col w-full mt-4 md:mt-0 p-8 bg-white shadow-lg rounded-lg transition-transform duration-500 hover:scale-105 hover:shadow-2xl">
                 <h2 class="text-5xl font-bold text-green-800 leading-tight mb-6 transition-transform duration-500 hover:scale-105 hover:text-green-900">Nuestra Visión</h2>
                 <p class="font-normal text-2xl leading-normal text-green-600 transition-transform duration-500 hover:scale-105 hover:text-green-700">
-                    Ser una institución educativa de referencia, comprometida con la excelencia académica y el desarrollo integral de nuestros estudiantes, contribuyendo al bienestar de la sociedad y al progreso del país.
+                    Para el año 2025 la IEPSN será reconocida en el ámbito municipal como una institución educativa incluyente y competitiva en la formación de bachilleres técnicos, con un alto nivel académico, dotados con las habilidades necesarias
+                    para afrontar el mundo laboral y/o académico y contribuir a la convivencia ambiental y pacífica de su entorno.
                 </p>
             </div>
         </div>

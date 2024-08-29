@@ -5,7 +5,7 @@
         <div class="mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between">
             <router-link to="/" class="flex items-center hover:opacity-80 transition-opacity duration-300">
                 <img src="https://p.plataformaintegra.net/ipsnb/img/colegio/escudo_auth.jpg" alt="Descripción de la imagen" class="h-12 mr-5" />
-                <span class="text-surface-900 dark:text-surface-0 font-medium text-2xl leading-normal mr-20">IPSNB</span>
+                <span class="text-surface-900 dark:text-surface-0 font-medium text-2xl leading-normal mr-20">IEPSN</span>
             </router-link>
             <Button
                 class="lg:!hidden"
@@ -56,6 +56,9 @@
                             </li>
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
                                 <router-link to="sobre-nosotros#instalaciones" class="block text-surface-900 dark:text-surface-0">Instalaciones</router-link>
+                            </li>
+                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
+                                <a href="/public/files/MANUAL_DE_CONVIVENCIA.pdf" target="_blank" class="block text-surface-900 dark:text-surface-0">MANUAL DE CONVIVENCIA</a>
                             </li>
                         </ul>
                     </li>

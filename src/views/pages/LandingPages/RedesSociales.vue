@@ -3,8 +3,11 @@
 <template>
     <!-- Div para logotipos de redes sociales -->
     <div id="social-media">
-        <a href="https://www.facebook.com" target="_blank" class="social-icon">
+        <a href="https://www.facebook.com/share/KdbiV3XGV8J73iKF/?mibextid=qi2Omg" target="_blank" class="social-icon" title="Facebook">
             <img src="https://cdn-icons-png.flaticon.com/256/124/124010.png" alt="Facebook" />
+        </a>
+        <a href="https://q.plataformaintegra.net/ipsnb/" target="_blank" class="social-icon" title="Integra">
+            <img src="https://p.plataformaintegra.net/ipsnb/img/colegio/escudo_auth.jpg" alt="Plataforma Integra" />
         </a>
         <a href="https://www.twitter.com" target="_blank" class="social-icon">
             <img src="https://cdn-icons-png.flaticon.com/512/3938/3938028.png" alt="Twitter" />
