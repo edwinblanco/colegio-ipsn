@@ -1,17 +1,24 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import store from '@/store';
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        /*{
-            path: '/',
+        {
+            path: '/dashboard',
             component: AppLayout,
             children: [
                 {
-                    path: '/',
+                    path: '/dashboard',
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
+                },
+                {
+                    path: '/gestionar-examen',
+                    name: 'gestionar-examen',
+                    component: () => import('@/views/GestionarExamen.vue'),
+                    meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
                 },
                 {
                     path: '/uikit/formlayout',
@@ -105,7 +112,7 @@ const router = createRouter({
                     component: () => import('@/views/pages/Documentation.vue')
                 }
             ]
-        },*/
+        },
         {
             path: '/pagina-principal',
             name: 'pagina-principal',
@@ -165,7 +172,7 @@ const router = createRouter({
                     path: '/contacto',
                     name: 'contacto',
                     component: () => import('@/views/pages/LandingPages/Contacto.vue')
-                },
+                }
             ]
         },
         {
@@ -192,13 +199,36 @@ const router = createRouter({
     ],
     scrollBehavior(to, from, savedPosition) {
         if (to.hash) {
-          return {
-            el: to.hash,
-            behavior: 'smooth'
-          };
+            return {
+                el: to.hash,
+                behavior: 'smooth'
+            };
         }
         return { top: 0 };
-      }
+    }
 });
+
+
+// Guard para verificar la autorización
+router.beforeEach((to, from, next) => {
+    const userData = store.getters['auth/getUser'];
+    const isAuthenticated = store.getters['auth/isAuthenticated'];
+    const userRoles = userData?.roles || [];
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        // Si la ruta requiere autenticación y no está autenticado
+        return next({ path: '/auth/login' }); // Redirigir a la página de login
+    }
+
+    if (to.meta.roles && to.meta.roles.length) {
+        const hasAccess = to.meta.roles.some((role) => userRoles.includes(role));
+        if (!hasAccess) {
+            return next({ path: '/auth/access' }); // O redirigir a otra página de acceso denegado
+        }
+    }
+
+    next(); // Permitir la navegación
+});
+
 
 export default router;

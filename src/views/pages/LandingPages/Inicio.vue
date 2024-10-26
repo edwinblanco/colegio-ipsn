@@ -2,9 +2,9 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 
 const images = [
-    'https://www.ahm.org.py/wp-content/uploads/2022/07/Colegio-Politecnico-Johannes-Gutenberg-2022-1.jpg',
-    'http://theenglishclub.es/wp-content/uploads/2018/04/Colegio_San_Juan_Bautista_de_La_Salle_Valladolid-scaled.jpg',
-    'https://tse1.mm.bing.net/th?id=OIP.5yM7YUo1EfGmvoOBWwfRfwAAAA&pid=Api&P=0&h=180'
+    '/images/principal.jpeg',
+    '/images/principal2.jpg',
+    '/images/principal3.jpg'
 ];
 
 const currentImage = ref(0);

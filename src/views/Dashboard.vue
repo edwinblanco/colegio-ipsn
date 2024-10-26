@@ -1,7 +1,12 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { ProductService } from '@/service/ProductService';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
+const user = computed(() => store.getters['auth/getUser']);
+const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
@@ -101,6 +106,12 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
 </script>
 
 <template>
+    <div v-if="isAuthenticated">
+        <p>Bienvenido, {{ user.user.primer_nombre }}</p>
+    </div>
+    <div v-else>
+        <p>No estás autenticado.</p>
+    </div>
     <div class="grid grid-cols-12 gap-8">
         <div class="col-span-12 lg:col-span-6 xl:col-span-3">
             <div class="card mb-0">

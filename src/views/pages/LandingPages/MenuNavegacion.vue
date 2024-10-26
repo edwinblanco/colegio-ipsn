@@ -211,7 +211,7 @@
                     </li>
                 </ul>
                 <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-                    <Button label="Ingresar" text as="router-link" to="/" rounded></Button>
+                    <Button label="Ingresar" text as="router-link" to="/auth/login" rounded></Button>
                     <Button label="Registrarme" to="/" rounded></Button>
                 </div>
             </div>
