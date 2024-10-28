@@ -11,7 +11,8 @@ const model = ref([
         items: [
             { label: 'Panel Profesores', icon: 'pi pi-fw pi-home', to: '/dashboard' },
             { label: 'Panel Estudiante', icon: 'pi pi-fw pi-home', to: '/dashboard' },
-            { label: 'Crear Examen', icon: 'pi pi-fw pi-file-edit', to: '/gestionar-examen' }
+            { label: 'Gestionar Examen', icon: 'pi pi-fw pi-file-edit', to: '/gestionar-examen' },
+            { label: 'Gestionar Estudiantes', icon: 'pi pi-fw pi-users', to: '/gestionar-estudiantes' }
         ]
     },
     {
@@ -157,7 +158,8 @@ const filteredModel = computed(() => {
 
                 // permisos para profesor
                 if (usuario.value.includes('profesor') && item.label == 'Panel Profesores') return true;
-                if (usuario.value.includes('profesor') && item.label == 'Crear Examen') return true;
+                if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
+                if (usuario.value.includes('profesor') && item.label == 'Gestionar Estudiantes') return true;
 
                 // permisos para estudiante
                 if (usuario.value.includes('estudiante') && item.label == 'Panel Estudiante') return true;

@@ -1,6 +1,6 @@
 import AppLayout from '@/layout/AppLayout.vue';
-import { createRouter, createWebHistory } from 'vue-router';
 import store from '@/store';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -18,6 +18,12 @@ const router = createRouter({
                     path: '/gestionar-examen',
                     name: 'gestionar-examen',
                     component: () => import('@/views/GestionarExamen.vue'),
+                    meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
+                },
+                {
+                    path: '/gestionar-estudiantes',
+                    name: 'gestionar-estudiantes',
+                    component: () => import('@/views/GestionarEstudiante.vue'),
                     meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
                 },
                 {
@@ -208,7 +214,6 @@ const router = createRouter({
     }
 });
 
-
 // Guard para verificar la autorización
 router.beforeEach((to, from, next) => {
     const userData = store.getters['auth/getUser'];
@@ -229,6 +234,5 @@ router.beforeEach((to, from, next) => {
 
     next(); // Permitir la navegación
 });
-
 
 export default router;

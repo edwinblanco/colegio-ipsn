@@ -7,8 +7,9 @@ import axios from 'axios';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch } from 'vue';
-import PreguntasModal from './Componentes/PreguntasModal.vue';
 import Cargando from './Componentes/Cargando.vue';
+import PreguntasModal from './Componentes/PreguntasModal.vue';
+import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
 
 const userData1 = store.getters['auth/getUser'];
 const isAuthenticated1 = store.getters['auth/isAuthenticated'];
@@ -63,7 +64,7 @@ const confirm = useConfirm();
 const dt = ref();
 const products = ref();
 const verModalCrearExamen = ref(false);
-const deleteProductDialog = ref(false);
+const verModalAsginarExamenGrupo = ref(false);
 const deleteProductsDialog = ref(false);
 const product = ref({});
 const selectedProducts = ref();
@@ -152,9 +153,19 @@ function abrirModalPreguntas(data) {
     verModalPreguntas.value = true;
 }
 
+function abrirModalAsignarExamenGrado(data) {
+    examenSeleccionado.value = data;
+    verModalAsginarExamenGrupo.value = true;
+}
+
 function cerrarModalPreguntas() {
     examenSeleccionado.value = null;
     verModalPreguntas.value = false;
+}
+
+function cerrarModalAsignarExamenGrado() {
+    examenSeleccionado.value = null;
+    verModalAsginarExamenGrupo.value = false;
 }
 
 function hideDialog() {
@@ -248,23 +259,6 @@ const convertirAFechaMySQL = (fechaISO) => {
     return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 };
 
-function editProduct(prod) {
-    product.value = { ...prod };
-    verModalCrearExamen.value = true;
-}
-
-function confirmDeleteProduct(prod) {
-    product.value = prod;
-    deleteProductDialog.value = true;
-}
-
-function deleteProduct() {
-    products.value = products.value.filter((val) => val.id !== product.value.id);
-    deleteProductDialog.value = false;
-    product.value = {};
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-}
-
 function exportCSV() {
     dt.value.exportCSV();
 }
@@ -272,14 +266,6 @@ function exportCSV() {
 function confirmDeleteSelected() {
     deleteProductsDialog.value = true;
 }
-
-function deleteSelectedProducts() {
-    products.value = products.value.filter((val) => !selectedProducts.value.includes(val));
-    deleteProductsDialog.value = false;
-    selectedProducts.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
-}
-
 </script>
 
 <template>
@@ -362,21 +348,19 @@ function deleteSelectedProducts() {
                         <Tag :value="slotProps.data.estado" :severity="slotProps.data.severity" />
                     </template>
                 </Column>
-                <Column header="Preguntas" sortable style="min-width: 12rem">
+                <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
-                        <Button icon="pi pi-question" outlined rounded @click="abrirModalPreguntas(slotProps.data)" />
-                    </template>
-                </Column>
-                <Column :exportable="false" style="min-width: 12rem">
-                    <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editProduct(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteProduct(slotProps.data)" />
+                        <Button icon="pi pi-question" outlined rounded class="mr-2" @click="abrirModalPreguntas(slotProps.data)" v-tooltip="{ value: 'Gestionar preguntas del examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" />
                     </template>
                 </Column>
             </DataTable>
         </div>
 
         <PreguntasModal v-if="verModalPreguntas" :verModal="verModalPreguntas" :examen="examenSeleccionado" @ocultarModalPreguntas="cerrarModalPreguntas" />
+        <AsignarExamenGrado v-if="verModalAsginarExamenGrupo" :verModal="verModalAsginarExamenGrupo" :examen="examenSeleccionado" @ocultarModalAsignarExamenGrado="cerrarModalAsignarExamenGrado" />
 
         <Dialog v-model:visible="verModalCrearExamen" :style="{ width: '750px' }" header="Crear examen" :modal="true" :draggable="false">
             <div class="flex flex-col gap-6">
@@ -436,36 +420,8 @@ function deleteSelectedProducts() {
                 <Button label="Guardar" icon="pi pi-check" @click="guardarExamen" />
             </template>
         </Dialog>
-
-        <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
-            <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="product"
-                    >Are you sure you want to delete <b>{{ product.name }}</b
-                    >?</span
-                >
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteProductDialog = false" />
-                <Button label="Yes" icon="pi pi-check" @click="deleteProduct" />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
-            <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="product">Are you sure you want to delete the selected products?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteProductsDialog = false" />
-                <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedProducts" />
-            </template>
-        </Dialog>
     </div>
 
-    <Cargando v-if="verCargandoSpiner"/>
-
+    <Cargando v-if="verCargandoSpiner" />
 </template>
-<style scoped>
-
-</style>
+<style scoped></style>

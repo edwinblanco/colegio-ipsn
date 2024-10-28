@@ -108,6 +108,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
 <template>
     <div v-if="isAuthenticated">
         <p>Bienvenido, {{ user.user.primer_nombre }}</p>
+        <p>{{ user.user.grado }}</p>
     </div>
     <div v-else>
         <p>No estás autenticado.</p>
