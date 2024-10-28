@@ -54,7 +54,6 @@ const iniciarSesion = async () => {
         router.push('/dashboard');
     } catch (error) {
         cargando.value = false;
-
         if (error.response.data.msg) {
             errorInicioSesion.value = error.response.data.msg;
         } else {
