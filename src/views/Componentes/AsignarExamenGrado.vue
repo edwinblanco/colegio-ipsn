@@ -37,7 +37,7 @@
                 </Column>
 
             </DataTable>
-            <Message v-else severity="warn" class="my-2">Sin asignaciones</Message>
+            <Message v-if="asignaciones.length < 1 && !cargandoGeneral2" severity="warn" class="my-2">Sin asignaciones</Message>
             <Cargando2 v-if="cargandoGeneral2" />
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Cancelar" class="my-2" severity="secondary" @click="emit('ocultarModalAsignarExamenGrado')"></Button>

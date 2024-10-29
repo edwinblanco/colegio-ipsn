@@ -15,6 +15,11 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
+                    path: '/panel-estudiante',
+                    name: 'panel-estudiante',
+                    component: () => import('@/views/PanelEstudiante.vue')
+                },
+                {
                     path: '/gestionar-examen',
                     name: 'gestionar-examen',
                     component: () => import('@/views/GestionarExamen.vue'),

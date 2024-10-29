@@ -10,7 +10,7 @@ const model = ref([
         label: 'Inicio',
         items: [
             { label: 'Panel Profesores', icon: 'pi pi-fw pi-home', to: '/dashboard' },
-            { label: 'Panel Estudiante', icon: 'pi pi-fw pi-home', to: '/dashboard' },
+            { label: 'Panel Estudiante', icon: 'pi pi-fw pi-home', to: '/panel-estudiante' },
             { label: 'Gestionar Examen', icon: 'pi pi-fw pi-file-edit', to: '/gestionar-examen' },
             { label: 'Gestionar Estudiantes', icon: 'pi pi-fw pi-users', to: '/gestionar-estudiantes' }
         ]
