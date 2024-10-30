@@ -1,14 +1,10 @@
 <script setup>
-import { ProductService } from '@/service/ProductService';
 import store from '@/store';
 import { URL, validarToken } from '@/utils';
 import { FilterMatchMode } from '@primevue/core/api';
 import axios from 'axios';
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch } from 'vue';
 import Cargando from './Componentes/Cargando.vue';
-import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
 import PresentarExamenModal from './Componentes/PresentarExamenModal.vue';
 
 const userData1 = store.getters['auth/getUser'];
@@ -31,7 +27,6 @@ watch(activeTab, (newValue) => {
 });
 
 onMounted(() => {
-
     // Validar el token
     validarToken(userData1);
 
@@ -171,14 +166,15 @@ const convertirAFechaMySQL = (fechaISO) => {
     </div>
     <div v-if="!cargandoComponente">
         <div v-if="materias">
-
-            <Tabs>
-                <TabList>
-                    <Tab v-for="materia in materias" :key="materia.name" :value="String(materia.code)" @click="consultarExamenes(materia.code)">
-                        <i class="pi pi-book mr-1" /> <span>{{ materia.name }}</span>
-                    </Tab>
-                </TabList>
-            </Tabs>
+            <div class="card p-0">
+                <Tabs scrollable>
+                    <TabList>
+                        <Tab v-for="materia in materias" :key="materia.name" :value="String(materia.code)" @click="consultarExamenes(materia.code)">
+                            <i class="pi pi-book mr-1" /> <span>{{ materia.name }}</span>
+                        </Tab>
+                    </TabList>
+                </Tabs>
+            </div>
 
             <DataTable
                 v-if="examenes.length > 0"
@@ -217,7 +213,7 @@ const convertirAFechaMySQL = (fechaISO) => {
                 </Column>
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
-                        <Button icon="pi pi-play" label="Presentar" severity="contrast"  rounded class="m-0 p-0" @click="abrirModalPresentarExamen(slotProps.data)" v-tooltip="{ value: 'Presentar examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-play" label="Presentar" severity="contrast" rounded class="m-0 p-0" @click="abrirModalPresentarExamen(slotProps.data)" v-tooltip="{ value: 'Presentar examen', showDelay: 0, hideDelay: 0 }" />
                         <!--<Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" />-->
@@ -227,7 +223,6 @@ const convertirAFechaMySQL = (fechaISO) => {
         </div>
 
         <PresentarExamenModal v-if="verModalPresentarExamen" :verModal="verModalPresentarExamen" :examen="examenSeleccionado" @ocultarModalAsignarExamenGrado="cerrarModalPresentarExamen" />
-
     </div>
 
     <Cargando v-if="verCargandoSpiner" />

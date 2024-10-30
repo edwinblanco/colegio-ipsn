@@ -3,30 +3,42 @@
     <div class="card flex justify-center">
         <Dialog v-model:visible="abrirModal" :header="headerModal" maximizable modal @hide="emit('ocultarModalAsignarExamenGrado')" :style="{ width: '80rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="flex flex-col gap-12">
-                <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-10 border">
-                        <div v-if="pregunta">
-                            <h2>{{ pregunta.contenido }}</h2>
-                            <div v-for="opcion in pregunta.opciones" :key="opcion.id">
-                                <label>
-                                    <input type="radio" :value="opcion.id" v-model="respuestaSeleccionada" />
-                                    {{ opcion.contenido }}
-                                </label>
-                            </div>
-                            <div class="flex justify-between mt-4">
-                                <button @click="preguntaAnterior" :disabled="currentPreguntaIndex === 0">Anterior</button>
-                                <button @click="siguientePregunta">Siguiente</button>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div class="md:col-span-10 p-4">
+                        <div v-if="pregunta && !cargandoPregunta">
+                            <h2 class="my-2">
+                                <b>{{ pregunta.contenido }}</b>
+                            </h2>
+                            <div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div v-for="opcion in pregunta.opciones" :key="opcion.id" class="col-span-1">
+                                        <div class="flex items-center">
+                                            <RadioButton v-model="respuestaSeleccionada" :inputId="'opcion' + opcion.id" name="opciones" :value="opcion.id" />
+                                            <label :for="'opcion' + opcion.id" class="ml-2">{{ opcion.contenido }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between mt-4">
+                                    <Button icon="pi pi-chevron-left" outlined @click="preguntaAnterior" :disabled="currentPreguntaIndex === 0"></Button>
+                                    <Button icon="pi pi-chevron-right" outlined @click="siguientePregunta" v-if="!(currentPreguntaIndexTotal === currentPreguntaIndex)"></Button>
+                                </div>
                             </div>
                         </div>
-                        <div v-else>
-                            <p>Cargando pregunta...</p>
+                        <Cargando2 v-if="cargandoPregunta"></Cargando2>
+                    </div>
+                    <div class="md:col-span-2 border">
+                        <div class="flex flex-wrap gap-2">
+                            <div v-for="(pregunta, index) in preguntas" :key="pregunta.id">
+                                <Button v-if="pregunta.tiene_respuesta" :label="String(index + 1)" size="small" class="m-1" />
+                                <Button v-else :label="String(index + 1)" size="small" outlined class="m-1" />
+                            </div>
                         </div>
                     </div>
-                    <div class="col-span-2 border"></div>
                 </div>
             </div>
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Cancelar" class="my-2" severity="secondary" @click="emit('ocultarModalAsignarExamenGrado')"></Button>
+                <Button type="button" label="Enviar todo y terminar" severity="contrast" :disabled="!habilitarTerminarTodo" class="my-2" @click=""></Button>
             </div>
         </Dialog>
     </div>
@@ -41,6 +53,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import Cargando from './Cargando.vue';
+import Cargando2 from './Cargando2.vue';
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -48,11 +61,11 @@ const emit = defineEmits(['ocultarModalAsignarExamenGrado']);
 const props = defineProps({
     verModal: {
         type: Boolean,
-        required: true,
+        required: true
     },
     examen: {
         type: Object,
-        required: true,
+        required: true
     }
 });
 
@@ -63,8 +76,12 @@ const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 const abrirModal = ref(props.verModal);
 const cargandoGeneral = ref(false);
 const pregunta = ref(null); // Para almacenar la pregunta actual
+const preguntas = ref(null);
 const currentPreguntaIndex = ref(0); // Índice de la pregunta actual
 const respuestaSeleccionada = ref(null); // Opción seleccionada por el estudiante
+const cargandoPregunta = ref(false);
+const currentPreguntaIndexTotal = ref(null);
+const habilitarTerminarTodo = ref(false);
 
 onMounted(() => {
     // Validar el token
@@ -78,7 +95,7 @@ const consultarPreguntas = async () => {
     const token = userData1.access_token;
 
     try {
-        const response = await axios.get(URL + `obtener-examen-preguntas-opciones/${props.examen.code}`, {
+        const response = await axios.get(URL + `obtener-examen-preguntas/${props.examen.code}`, {
             headers: {
                 Authorization: `Bearer ${token}`, // Agregar el Bearer token
                 Accept: 'application/json', // Tipo de respuesta aceptada
@@ -86,31 +103,19 @@ const consultarPreguntas = async () => {
             }
         });
 
-        let gradosList = [];
-
         console.log('preguntas: ', response);
 
-        /*if (response.data.data.length) {
-            response.data.data.map((num, index) => {
-                let grado = { name: num.grado + '-' + num.salon + '°', code: num.id };
-                gradosList.push(grado);
-            });
-
-            grados.value = gradosList;
-
-            //ocultar el spinner de carga de las preguntas
-            cargandoGrados.value = false;
-        } else {
-            //ocultar el spinner de carga de las preguntas
-            cargandoGrados.value = false;
-        }*/
+        currentPreguntaIndexTotal.value = response.data.data.preguntas.length - 1;
+        preguntas.value = response.data.data.preguntas;
     } catch (err) {
-        console.log('Error al obtener datos de grados: ' + err.message); // Manejo de errores
+        console.log('Error al obtener datos de preguntas: ' + err.message); // Manejo de errores
     }
 };
 
 const obtenerPregunta = async () => {
     const token = userData1.access_token;
+    cargandoPregunta.value = true;
+    pregunta.value = false;
 
     try {
         const response = await axios.get(URL + `obtener-pregunta/${props.examen.code}/${currentPreguntaIndex.value}`, {
@@ -121,24 +126,26 @@ const obtenerPregunta = async () => {
             }
         });
 
-        console.log('pregunta sola: ', response.data.data);
-        pregunta.value = response.data.data; // Almacena la pregunta obtenida
+        console.log('pregunta sola: ', response.data);
+        pregunta.value = response.data.data;
+        habilitarTerminarTodo.value = response.data.examen_completado;
+        if (response.data.resp) {
+            respuestaSeleccionada.value = response.data.resp.respuesta_id;
+        }
+        cargandoPregunta.value = false;
     } catch (error) {
         console.error('Error al obtener la pregunta:', error);
+        cargandoPregunta.value = false;
     }
 };
 
 const siguientePregunta = () => {
-    if (respuestaSeleccionada.value !== null) {
-        guardarRespuesta(); // Guarda la respuesta de la pregunta actual
+    guardarRespuesta(); // Guarda la respuesta de la pregunta actual
 
-        // Avanza a la siguiente pregunta
-        currentPreguntaIndex.value++;
-        respuestaSeleccionada.value = null; // Reinicia la selección
-        obtenerPregunta(); // Carga la siguiente pregunta
-    } else {
-        alert('Por favor selecciona una respuesta.');
-    }
+    // Avanza a la siguiente pregunta
+    currentPreguntaIndex.value++;
+    respuestaSeleccionada.value = null; // Reinicia la selección
+    obtenerPregunta(); // Carga la siguiente pregunta
 };
 
 const preguntaAnterior = () => {
@@ -152,9 +159,10 @@ const preguntaAnterior = () => {
 
 const guardarRespuesta = async () => {
     const token = userData1.access_token;
+    cargandoPregunta.value = true;
 
     try {
-        await axios.post(
+        const response = await axios.post(
             URL + 'guardar-respuesta',
             {
                 pregunta_id: pregunta.value.id,
@@ -169,10 +177,12 @@ const guardarRespuesta = async () => {
             }
         );
 
-        console.log('Respuesta guardada');
+        console.log('Respuesta guardada: ', response);
+        consultarPreguntas();
+        habilitarTerminarTodo.value = response.data.examen_completado;
     } catch (error) {
         console.error('Error al guardar la respuesta:', error);
+        cargandoPregunta.value = false;
     }
 };
 </script>
-
