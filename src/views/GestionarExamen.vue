@@ -1,19 +1,17 @@
 <script setup>
-import { ProductService } from '@/service/ProductService';
 import store from '@/store';
 import { URL, validarToken } from '@/utils';
 import { FilterMatchMode } from '@primevue/core/api';
 import axios from 'axios';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
+import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
 import Cargando from './Componentes/Cargando.vue';
 import PreguntasModal from './Componentes/PreguntasModal.vue';
-import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
 
 const userData1 = store.getters['auth/getUser'];
 const isAuthenticated1 = store.getters['auth/isAuthenticated'];
-
 const verModalPreguntas = ref(false);
 
 // cargar materias
@@ -26,58 +24,33 @@ const fechaLimite = ref(null);
 const estadoExamen = ref(null);
 const verCargandoSpiner = ref(false);
 const examenSeleccionado = ref(null);
-
-const cargandoComponente = ref(true);
-const esLocale = ref({
-    firstDayOfWeek: 1,
-    dayNames: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
-    dayNamesShort: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
-    dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
-    monthNames: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
-    monthNamesShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
-    today: 'Hoy',
-    clear: 'Limpiar'
-});
-
-// Track the active tab
-const activeTab = ref('0');
-
-// Watch for changes in the active tab
-watch(activeTab, (newValue) => {
-    console.log('Active tab changed to:', newValue);
-});
-
-onMounted(() => {
-    ProductService.getProducts().then((data) => (products.value = data));
-
-    // Validar el token
-    validarToken(userData1);
-
-    // Se cargan las materias del profesor
-    consultarMaterias();
-
-    cargandoComponente.value = false;
-});
-
 const toast = useToast();
 const confirm = useConfirm();
 const dt = ref();
-const products = ref();
 const verModalCrearExamen = ref(false);
 const verModalAsginarExamenGrupo = ref(false);
-const deleteProductsDialog = ref(false);
 const product = ref({});
 const selectedProducts = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const submitted = ref(false);
+const minDate = new Date();
+const idExamen = ref(null);
+const editarExamen = ref(false);
+const headerModalExamen = ref('Crear examen');
+
+onMounted(() => {
+    // Validar el token
+    validarToken(userData1);
+    // Se cargan las materias del profesor
+    consultarMaterias();
+});
 
 const consultarMaterias = async () => {
     const id = userData1.user.id; // Obtener el ID del usuario
-
-    // Obtener el token Bearer
     const token = userData1.access_token;
+    verCargandoSpiner.value = true;
 
     try {
         const response = await axios.get(URL + `materias-por-profesor/${id}`, {
@@ -96,7 +69,9 @@ const consultarMaterias = async () => {
         });
 
         materias.value = materiasList;
+        verCargandoSpiner.value = false;
     } catch (err) {
+        verCargandoSpiner.value = false;
         console.log('Error al obtener datos: ' + err.message); // Manejo de errores
     }
 };
@@ -116,10 +91,7 @@ const consultarExamenes = async (materia) => {
             }
         });
 
-        console.log('examens: ', response);
-
         let examenesList = [];
-
         response.data.data.map((num, index) => {
             let severity = num.estado === 'activo' ? 'success' : 'danger';
 
@@ -129,7 +101,8 @@ const consultarExamenes = async (materia) => {
                 fecha_limite: num.fecha_limite,
                 estado: num.estado,
                 descripcion: num.descripcion,
-                severity: severity
+                severity: severity,
+                materia: num.materia
             };
             examenesList.push(examen);
         });
@@ -168,7 +141,9 @@ function cerrarModalAsignarExamenGrado() {
     verModalAsginarExamenGrupo.value = false;
 }
 
-function hideDialog() {
+function ocultarModalCrearExamen() {
+    editarExamen.value = false;
+    headerModalExamen.value = 'Crear examen';
     verModalCrearExamen.value = false;
     submitted.value = false;
 }
@@ -183,10 +158,23 @@ function guardarExamen() {
     }
 
     // Si todos los campos están llenos, proceder con la solicitud
-    confirm1();
+
+    confirmarCreacionExamen();
 }
 
-const confirm1 = () => {
+function editarExamen2() {
+    submitted.value = true;
+
+    // Verificar si alguno de los campos está vacío
+    if (!materiaSeleccionada.value || !tituloExamen.value || !fechaLimite.value || !estadoExamen.value) {
+        console.log('Error: Todos los campos son obligatorios.');
+        return; // No continuar si algún campo está vacío
+    }
+
+    confirmarEditarExamen();
+}
+
+const confirmarCreacionExamen = () => {
     confirm.require({
         message: '¿está seguro de crear el examen?',
         header: 'Confirmación',
@@ -232,14 +220,102 @@ const guardarExamenServidor = async () => {
 
         console.log('respuesta: ', response);
         verCargandoSpiner.value = false;
-        hideDialog();
+        ocultarModalCrearExamen();
         toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Examen creado', life: 6000 });
         consultarExamenes(materiaSeleccionada.value.code);
+
+        idExamen.value = null;
+        tituloExamen.value = null;
+        estadoExamen.value = null;
+        descripcion.value = null;
+        fechaLimite.value = null;
+        materiaSeleccionada.value = null;
     } catch (error) {
         verCargandoSpiner.value = false;
         toast.add({ severity: 'error', summary: 'Error', detail: 'Error al crear el examen', life: 6000 });
         console.log('error creando el examen: ', error);
     }
+};
+
+const confirmarEditarExamen = () => {
+    confirm.require({
+        message: '¿está seguro de editar el examen?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Editar'
+        },
+        accept: () => {
+            editarExamenServidor();
+        },
+        reject: () => {
+            //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const editarExamenServidor = async () => {
+    try {
+        verCargandoSpiner.value = true;
+        const token = userData1.access_token; // Reemplaza esto con tu token Bearer real
+        const response = await axios.post(
+            URL + 'editar-examen',
+            {
+                examen_id: idExamen.value,
+                materia_id: materiaSeleccionada.value.code,
+                profesor_id: userData1.user.id,
+                descripcion: descripcion.value,
+                titulo: tituloExamen.value,
+                fecha_limite: convertirAFechaMySQL(fechaLimite.value),
+                estado: estadoExamen.value
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        console.log('respuesta editar: ', response);
+        verCargandoSpiner.value = false;
+        ocultarModalCrearExamen();
+        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Examen actualizado', life: 6000 });
+        consultarExamenes(materiaSeleccionada.value.code);
+
+        idExamen.value = null;
+        tituloExamen.value = null;
+        estadoExamen.value = null;
+        descripcion.value = null;
+        fechaLimite.value = null;
+        materiaSeleccionada.value = null;
+    } catch (error) {
+        const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error: ${errorMessage}`, life: 10000 });
+        console.log('error editando el examen: ', error);
+        verCargandoSpiner.value = false;
+    }
+};
+
+const abrirModalEditarExamen = (examen) => {
+    idExamen.value = examen.code;
+    tituloExamen.value = examen.titulo;
+    estadoExamen.value = examen.estado;
+    descripcion.value = examen.descripcion;
+    fechaLimite.value = examen.fecha_limite;
+
+    let materia = { name: examen.materia.nombre, code: examen.materia.id, bg_color: examen.materia.bg_color };
+
+    materiaSeleccionada.value = materia;
+    editarExamen.value = true;
+    headerModalExamen.value = 'Editar  examen';
+
+    verModalCrearExamen.value = true;
 };
 
 const convertirAFechaMySQL = (fechaISO) => {
@@ -259,13 +335,52 @@ const convertirAFechaMySQL = (fechaISO) => {
     return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 };
 
-function exportCSV() {
-    dt.value.exportCSV();
-}
+const confirmarEliminarExamen = (examen) => {
+    idExamen.value = examen.code;
+    materiaSeleccionada.value = { name: examen.materia.nombre, code: examen.materia.id, bg_color: examen.materia.bg_color };
 
-function confirmDeleteSelected() {
-    deleteProductsDialog.value = true;
-}
+    confirm.require({
+        message: '¿está seguro de eliminar el examen?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'danger',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Eliminar'
+        },
+        accept: () => {
+            eliminarExamenServidor();
+        },
+        reject: () => {
+            //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const eliminarExamenServidor = async () => {
+    verCargandoSpiner.value = true;
+
+    try {
+        const token = userData1.access_token;
+        const response = await axios.delete(URL + 'eliminar-examen/' + idExamen.value, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        });
+        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Examen eliminado con exito`, life: 10000 });
+        verCargandoSpiner.value = false;
+        consultarExamenes(materiaSeleccionada.value.code);
+    } catch (error) {
+        console.log(error);
+        const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        verCargandoSpiner.value = false;
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error al eliminar: ${errorMessage}`, life: 10000 });
+    }
+};
 </script>
 
 <template>
@@ -275,33 +390,11 @@ function confirmDeleteSelected() {
     <div v-else>
         <p>No estás autenticado.</p>
     </div>
-    <div class="card" v-if="cargandoComponente">
-        <div class="rounded border border-surface-200 dark:border-surface-700 p-6 bg-surface-0 dark:bg-surface-900">
-            <div class="flex mb-4">
-                <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-                <div>
-                    <Skeleton width="10rem" class="mb-2"></Skeleton>
-                    <Skeleton width="5rem" class="mb-2"></Skeleton>
-                    <Skeleton height=".5rem"></Skeleton>
-                </div>
-            </div>
-            <Skeleton width="100%" height="150px"></Skeleton>
-            <div class="flex justify-between mt-4">
-                <Skeleton width="4rem" height="2rem"></Skeleton>
-                <Skeleton width="4rem" height="2rem"></Skeleton>
-            </div>
-        </div>
-    </div>
-    <div v-if="!cargandoComponente">
+    <div>
         <div class="card" v-if="materias">
             <Toolbar class="mb-1">
                 <template #start>
                     <Button label="Crear examen" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalExamen" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
-                </template>
-
-                <template #end>
-                    <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
 
@@ -324,7 +417,7 @@ function confirmDeleteSelected() {
                 :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} exámenes"
                 size="small"
             >
                 <template #header>
@@ -339,7 +432,6 @@ function confirmDeleteSelected() {
                     </div>
                 </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
                 <Column field="code" header="Código" sortable style="min-width: 2rem"></Column>
                 <Column field="titulo" header="Título" sortable style="min-width: 16rem"></Column>
                 <!--<Column field="descripcion" header="Descripción" sortable style="min-width: 16rem"></Column>-->
@@ -349,12 +441,14 @@ function confirmDeleteSelected() {
                         <Tag :value="slotProps.data.estado" :severity="slotProps.data.severity" />
                     </template>
                 </Column>
+                <Toast />
+                <ConfirmDialog></ConfirmDialog>
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
                         <Button icon="pi pi-question" outlined rounded class="mr-2" @click="abrirModalPreguntas(slotProps.data)" v-tooltip="{ value: 'Gestionar preguntas del examen', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarExamen(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
@@ -363,7 +457,7 @@ function confirmDeleteSelected() {
         <PreguntasModal v-if="verModalPreguntas" :verModal="verModalPreguntas" :examen="examenSeleccionado" @ocultarModalPreguntas="cerrarModalPreguntas" />
         <AsignarExamenGrado v-if="verModalAsginarExamenGrupo" :verModal="verModalAsginarExamenGrupo" :examen="examenSeleccionado" @ocultarModalAsignarExamenGrado="cerrarModalAsignarExamenGrado" />
 
-        <Dialog v-model:visible="verModalCrearExamen" :style="{ width: '750px' }" header="Crear examen" :modal="true" :draggable="false">
+        <Dialog v-model:visible="verModalCrearExamen" :style="{ width: '750px' }" :header="headerModalExamen" :modal="true" :draggable="false" @hide="ocultarModalCrearExamen">
             <div class="flex flex-col gap-6">
                 <img v-if="product.image" :src="`https://primefaces.org/cdn/primevue/images/product/${product.image}`" :alt="product.image" class="block m-auto pb-4" />
 
@@ -380,7 +474,7 @@ function confirmDeleteSelected() {
                     </div>
                     <div class="col-span-6">
                         <label for="deadline" class="block font-bold mb-3">Fecha límite</label>
-                        <DatePicker id="deadline" v-model="fechaLimite" showTime hourFormat="12" dateFormat="yy-mm-dd" :locale="esLocale" placeholder="Selecciona la fecha y hora" class="w-full" />
+                        <DatePicker id="deadline" v-model="fechaLimite" showTime hourFormat="12" dateFormat="yy-mm-dd" placeholder="Selecciona la fecha y hora" class="w-full" :minDate="minDate" />
                         <small v-if="submitted && !fechaLimite" class="text-red-500">La fecha límite es requerida</small>
                     </div>
                     <div class="col-span-6">
@@ -402,27 +496,22 @@ function confirmDeleteSelected() {
                         <small v-if="submitted && !estadoExamen" class="text-red-500">El estado es requerido</small>
                     </div>
                 </div>
-
-                <!--<div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-6">
-                        <label for="price" class="block font-bold mb-3">Price</label>
-                        <InputNumber id="price" v-model="product.price" mode="currency" currency="USD" locale="en-US" fluid />
-                    </div>
-                    <div class="col-span-6">
-                        <label for="quantity" class="block font-bold mb-3">Quantity</label>
-                        <InputNumber id="quantity" v-model="product.quantity" integeronly fluid />
-                    </div>
-                </div>-->
             </div>
             <template #footer>
                 <Toast />
                 <ConfirmDialog></ConfirmDialog>
-                <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
-                <Button label="Guardar" icon="pi pi-check" @click="guardarExamen" />
+                <Button label="Cancelar" icon="pi pi-times" text @click="ocultarModalCrearExamen" />
+                <Button v-if="!editarExamen" label="Guardar" icon="pi pi-check" @click="guardarExamen" />
+                <Button v-if="editarExamen" label="Editar" icon="pi pi-check" @click="editarExamen2" />
             </template>
         </Dialog>
     </div>
-
     <Cargando v-if="verCargandoSpiner" />
+
+    <div v-if="!examenes.length && !verCargandoSpiner" class="card flex items-center justify-center my-4">
+        <div class="p-card p-m-4">
+            <p class="font-bold text-xl text-center">La materia no tiene exámenes asociados</p>
+        </div>
+    </div>
 </template>
 <style scoped></style>
