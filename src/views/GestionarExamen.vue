@@ -137,7 +137,7 @@ const consultarExamenes = async (materia) => {
         examenes.value = examenesList;
         verCargandoSpiner.value = false;
     } catch (err) {
-        console.log('Error al obtener datos: ' + err.message); // Manejo de errores
+        console.log('Error al obtener datos: ', err); // Manejo de errores
         verCargandoSpiner.value = false;
     }
 };

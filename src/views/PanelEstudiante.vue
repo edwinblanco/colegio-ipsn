@@ -97,7 +97,8 @@ const consultarExamenes = async (materia) => {
                 titulo: num.titulo,
                 code: num.id,
                 fecha_limite: num.fecha_limite,
-                estado: num.estado,
+                estado: num.estado_examen,
+                estado_presentacion: num.estado_estudiante,
                 descripcion: num.descripcion,
                 severity: severity
             };
@@ -107,7 +108,7 @@ const consultarExamenes = async (materia) => {
         examenes.value = examenesList;
         verCargandoSpiner.value = false;
     } catch (err) {
-        console.log('Error al obtener datos: ' + err.message); // Manejo de errores
+        console.log('Error al obtener datos: ', err); // Manejo de errores
         verCargandoSpiner.value = false;
     }
 };
@@ -211,12 +212,37 @@ const convertirAFechaMySQL = (fechaISO) => {
                         <Tag :value="slotProps.data.estado" :severity="slotProps.data.severity" />
                     </template>
                 </Column>
+                <!---<Column field="estado_presentacion" header="Estado presentación" sortable style="min-width: 12rem">
+                    <template #body="slotProps">
+                        <Tag :value="slotProps.data.estado_presentacion" />
+                    </template>
+                </Column>-->
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
-                        <Button icon="pi pi-play" label="Presentar" severity="contrast" rounded class="m-0 p-0" @click="abrirModalPresentarExamen(slotProps.data)" v-tooltip="{ value: 'Presentar examen', showDelay: 0, hideDelay: 0 }" />
-                        <!--<Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" />-->
+                        <Tag v-if="slotProps.data.estado == 'cerrado'" value="No disponible" severity="warn" />
+                        <div v-else>
+                            <Button
+                                v-if="slotProps.data.estado_presentacion == 'pendiente'"
+                                icon="pi pi-play"
+                                label="Presentar"
+                                severity="contrast"
+                                rounded
+                                class="m-0 p-0"
+                                @click="abrirModalPresentarExamen(slotProps.data)"
+                                v-tooltip="{ value: 'Presentar examen', showDelay: 0, hideDelay: 0 }"
+                            />
+                            <Button
+                                v-if="slotProps.data.estado_presentacion == 'en proceso'"
+                                icon="pi pi-play"
+                                label="Continuar"
+                                severity="contrast"
+                                rounded
+                                class="m-0 p-0"
+                                @click="abrirModalPresentarExamen(slotProps.data)"
+                                v-tooltip="{ value: 'Presentar examen', showDelay: 0, hideDelay: 0 }"
+                            />
+                            <Button v-if="slotProps.data.estado_presentacion == 'completado'" icon="pi pi-play" label="Completado" disabled rounded class="m-0 p-0" />
+                        </div>
                     </template>
                 </Column>
             </DataTable>

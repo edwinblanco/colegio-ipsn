@@ -9,17 +9,24 @@
                             <h2 class="my-2">
                                 <b>{{ pregunta.contenido }}</b>
                             </h2>
+                            <div class="flex justify-center align-center flex-wrap">
+                                <div v-for="(imagen, index) in pregunta.imagenes" :key="imagen.id" class="m-2">
+                                    <!-- Agregar margenes -->
+                                    <Image :src="DOMINIO + imagen.url" alt="Image" width="450" preview />
+                                </div>
+                            </div>
                             <div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div v-for="opcion in pregunta.opciones" :key="opcion.id" class="col-span-1">
                                         <div class="flex items-center">
                                             <RadioButton v-model="respuestaSeleccionada" :inputId="'opcion' + opcion.id" name="opciones" :value="opcion.id" />
-                                            <label :for="'opcion' + opcion.id" class="ml-2">{{ opcion.contenido }}</label>
+                                            <label :for="'opcion' + opcion.id" class="ml-2">{{ opcion.contenido }} {{ opcion.id }} </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex justify-between mt-4">
                                     <Button icon="pi pi-chevron-left" outlined @click="preguntaAnterior" :disabled="currentPreguntaIndex === 0"></Button>
+                                    <Button label="Guardar respuesta" severity="info" size="small" outlined @click="guardarRespuestaConValidacion" :disabled="!respuestaSeleccionada"></Button>
                                     <Button icon="pi pi-chevron-right" outlined @click="siguientePregunta" v-if="!(currentPreguntaIndexTotal === currentPreguntaIndex)"></Button>
                                 </div>
                             </div>
@@ -29,16 +36,17 @@
                     <div class="md:col-span-2 border">
                         <div class="flex flex-wrap gap-2">
                             <div v-for="(pregunta, index) in preguntas" :key="pregunta.id">
-                                <Button v-if="pregunta.tiene_respuesta" :label="String(index + 1)" size="small" class="m-1" />
-                                <Button v-else :label="String(index + 1)" size="small" outlined class="m-1" />
+                                <Button v-if="pregunta.tiene_respuesta" :label="String(index + 1)" size="small" @click="obtenerPreguntaIndex(index)" :class="['m-1', { 'font-bold underline': index === currentPreguntaIndex }]" />
+                                <Button v-else :label="String(index + 1)" size="small" outlined @click="obtenerPreguntaIndex(index)" :class="['m-1', { 'font-bold underline': index === currentPreguntaIndex }]" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="flex justify-end gap-2">
+                <ConfirmPopup></ConfirmPopup>
                 <Button type="button" label="Cancelar" class="my-2" severity="secondary" @click="emit('ocultarModalAsignarExamenGrado')"></Button>
-                <Button type="button" label="Enviar todo y terminar" severity="contrast" :disabled="!habilitarTerminarTodo" class="my-2" @click=""></Button>
+                <Button type="button" label="Enviar todo y terminar" severity="contrast" :disabled="!habilitarTerminarTodo" class="my-2" @click="confirmarEnviarTodo"></Button>
             </div>
         </Dialog>
     </div>
@@ -47,7 +55,7 @@
 
 <script setup>
 import store from '@/store';
-import { URL, validarToken } from '@/utils';
+import { DOMINIO, URL, validarToken } from '@/utils';
 import axios from 'axios';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
@@ -86,9 +94,32 @@ const habilitarTerminarTodo = ref(false);
 onMounted(() => {
     // Validar el token
     validarToken(userData1);
+    iniciarExamen();
     obtenerPregunta();
     consultarPreguntas();
 });
+
+const iniciarExamen = async () => {
+    // Obtener el token Bearer
+    const token = userData1.access_token;
+
+    try {
+        const response = await axios.get(URL + `iniciar-examen/${props.examen.code}/${userData1.user.id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Agregar el Bearer token
+                Accept: 'application/json', // Tipo de respuesta aceptada
+                'Content-Type': 'application/json' // Tipo de contenido
+            }
+        });
+
+        console.log('Inicio de examen: ', response);
+    } catch (err) {
+        const errorMessage = err?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error: ${errorMessage}`, life: 10000 });
+        emit('ocultarModalAsignarExamenGrado');
+        console.log('Error al obtener datos de inicio de examen: ', err); // Manejo de errores
+    }
+};
 
 const consultarPreguntas = async () => {
     // Obtener el token Bearer
@@ -112,11 +143,16 @@ const consultarPreguntas = async () => {
     }
 };
 
+const obtenerPreguntaIndex = (index) => {
+    currentPreguntaIndex.value = index;
+    obtenerPregunta();
+};
+
 const obtenerPregunta = async () => {
     const token = userData1.access_token;
     cargandoPregunta.value = true;
     pregunta.value = false;
-
+    respuestaSeleccionada.value = null;
     try {
         const response = await axios.get(URL + `obtener-pregunta/${props.examen.code}/${currentPreguntaIndex.value}`, {
             headers: {
@@ -145,7 +181,6 @@ const siguientePregunta = () => {
     // Avanza a la siguiente pregunta
     currentPreguntaIndex.value++;
     respuestaSeleccionada.value = null; // Reinicia la selección
-    obtenerPregunta(); // Carga la siguiente pregunta
 };
 
 const preguntaAnterior = () => {
@@ -153,10 +188,24 @@ const preguntaAnterior = () => {
         guardarRespuesta(); // Guarda la respuesta de la pregunta actual
         currentPreguntaIndex.value--; // Retrocede a la pregunta anterior
         respuestaSeleccionada.value = null; // Reinicia la selección
-        obtenerPregunta(); // Carga la pregunta anterior
     }
 };
 
+// Cuando se da click en boton de guardar pregunta
+const guardarRespuestaConValidacion = () => {
+    const respuesta_id = respuestaSeleccionada.value;
+
+    console.log('res: ', respuestaSeleccionada.value);
+
+    if (!respuesta_id) {
+        toast.add({ severity: 'warning', summary: 'Campos sin diligenciar', detail: `Por favor completa todos los campos antes de enviar.`, life: 6000 });
+        return;
+    } else {
+        guardarRespuesta();
+    }
+};
+
+// Cuando se da click en los botones de navegación del examen
 const guardarRespuesta = async () => {
     const token = userData1.access_token;
     cargandoPregunta.value = true;
@@ -179,10 +228,59 @@ const guardarRespuesta = async () => {
 
         console.log('Respuesta guardada: ', response);
         consultarPreguntas();
+        obtenerPregunta();
         habilitarTerminarTodo.value = response.data.examen_completado;
     } catch (error) {
         console.error('Error al guardar la respuesta:', error);
         cargandoPregunta.value = false;
+    }
+};
+
+const confirmarEnviarTodo = (event) => {
+    confirm.require({
+        target: event.currentTarget,
+        message: '¿Enviar todo y terminar?',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Enviar y terminar'
+        },
+        accept: () => {
+            enviarTodo();
+        },
+        reject: () => {}
+    });
+};
+
+const enviarTodo = async () => {
+    const token = userData1.access_token;
+    cargandoGeneral.value = true;
+
+    try {
+        const response = await axios.post(
+            URL + 'enviar-y-terminar/' + props.examen.code,
+            {}, // Este es el cuerpo de la solicitud, si no necesitas enviar datos, puedes dejarlo vacío
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        console.log('Enviar todo: ', response);
+        cargandoGeneral.value = false;
+        toast.add({ severity: 'success', summary: 'Examen terminado', detail: `Examen terminado y enviado`, life: 10000 });
+        emit('ocultarModalAsignarExamenGrado');
+    } catch (error) {
+        const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error: ${errorMessage}`, life: 10000 });
+        cargandoGeneral.value = false;
+        console.error('Error enviar todo:', error);
     }
 };
 </script>

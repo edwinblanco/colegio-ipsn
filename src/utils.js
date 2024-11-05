@@ -5,6 +5,9 @@ const URL = 'http://localhost/proyectoBackCPSN/public/api/'; // Para la cada
 //const URL = 'http://localhost/colegio-ipsn-back/public/api/'; // Para el trabajo
 //const URL = 'https://coral-toad-721622.hostingersite.com/api/';
 
+const DOMINIO = 'http://localhost/proyectoBackCPSN/public/';
+//const DOMINIO = 'https://coral-toad-721622.hostingersite.com/public/';
+
 const validarToken = async (userData) => {
     if (!userData) {
         router.push('/auth/login'); // Redirigir si no hay token
@@ -29,4 +32,4 @@ const validarToken = async (userData) => {
     }
 };
 
-export { URL, validarToken };
+export { URL, validarToken, DOMINIO };

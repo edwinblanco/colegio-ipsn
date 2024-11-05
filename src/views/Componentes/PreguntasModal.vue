@@ -22,6 +22,17 @@
                         <p>{{ pregunta.name }}</p>
                         <p><b>Valor: </b>{{ pregunta.valor }}%</p>
                         <Button icon="pi pi-pencil" class="mx-1" severity="info" raised @click="editarPregunta(pregunta)" />
+
+                        <Divider />
+                        <p class="my-4">Imagenes cargadas:</p>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <div v-for="(imagen, index) in pregunta.imagenes" :key="imagen.id" :value="imagen.id" class="col-span-3 border p-2">
+                                <Image :src="DOMINIO + imagen.url" alt="Image" width="250" preview />
+                                <Button class="mx-1" icon="pi pi-trash" size="small" severity="danger" @click="confirmarEliminacionImg($event, imagen.id)"></Button>
+                            </div>
+                        </div>
+
                         <Divider />
                         <div>
                             <p class="text-center"><b>Opciones:</b></p>
@@ -70,15 +81,13 @@
                     <InputNumber v-model="valor" inputId="minmax" :min="0" :max="100" fluid />
                     <small v-if="!valor" class="text-red-500">Debe definir el porcentaje de la pregunta</small>
                 </div>
-                <div class="col-span-12" v-if="true">
+                <div class="col-span-12">
                     <Toast />
-                    <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="1000000" @select="onSelectedFiles">
-                        <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
+                    <FileUpload name="demo[]" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="10000000" @select="onSelectedFiles">
+                        <template #header="{ chooseCallback }">
                             <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
                                 <div class="flex gap-2">
                                     <Button @click="chooseCallback()" icon="pi pi-images" rounded outlined severity="secondary"></Button>
-                                    <Button @click="uploadEvent(uploadCallback)" icon="pi pi-cloud-upload" rounded outlined severity="success" :disabled="!files || files.length === 0"></Button>
-                                    <Button @click="clearCallback()" icon="pi pi-times" rounded outlined severity="danger" :disabled="!files || files.length === 0"></Button>
                                 </div>
                                 <ProgressBar :value="totalSizePercent" :showValue="false" class="md:w-20rem h-1 w-full md:ml-auto">
                                     <span class="whitespace-nowrap">{{ totalSize }}B / 1Mb</span>
@@ -164,7 +173,7 @@
 
 <script setup>
 import store from '@/store';
-import { URL, validarToken } from '@/utils';
+import { DOMINIO, URL, validarToken } from '@/utils';
 import axios from 'axios';
 import { usePrimeVue } from 'primevue/config';
 import { useConfirm } from 'primevue/useconfirm';
@@ -201,6 +210,7 @@ const checkedCorrecta = ref(false);
 const enunciadoOpcion = ref(null);
 const idPregunta = ref(null);
 const idopcion = ref(null);
+const idImagen = ref(null);
 const voyAcrearOpcion = ref(true);
 const voyAcrearPregunta = ref(true);
 const headerEditarCrearOpcion = ref('');
@@ -231,9 +241,11 @@ const consultarPreguntas = async () => {
 
         let preguntasList = [];
 
+        console.log('preguntas: ', response.data.data.preguntas);
+
         if (response.data.data.preguntas.length) {
             response.data.data.preguntas.map((num, index) => {
-                let pregunta = { name: num.contenido, code: num.id, valor: num.valor, opciones: num.opciones };
+                let pregunta = { name: num.contenido, code: num.id, valor: num.valor, opciones: num.opciones, imagenes: num.imagenes };
                 preguntasList.push(pregunta);
             });
 
@@ -255,28 +267,41 @@ const consultarPreguntas = async () => {
     }
 };
 
-const guardarPreguntaServidor = async () => {
+const guardarPreguntaServidor = async (event) => {
     cargandoGeneral.value = true;
     sinPreguntasAsignadas.value = false;
+
+    // Crear un nuevo objeto FormData
+    const formData = new FormData();
+
+    // Agrega los datos del examen
+    formData.append('examen_id', props.examen.code);
+    formData.append('contenido', enunciado.value);
+    formData.append('valor', valor.value);
+
+    console.log(files.value);
+
+    // Agrega las imágenes seleccionadas
+    files.value.forEach((file) => {
+        formData.append('imagenes[]', file); // Asegúrate de que el nombre coincide con lo que esperas en el backend
+    });
+
     try {
         const token = userData1.access_token;
         const response = await axios.post(
             URL + 'crear-pregunta',
-            {
-                examen_id: props.examen.code,
-                contenido: enunciado.value,
-                valor: valor.value
-            },
+            formData, // Enviamos el FormData
             {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data', // Asegúrate de que el tipo de contenido sea multipart/form-data
                     Authorization: `Bearer ${token}`
                 }
             }
         );
+
         verModalCrearPregunta.value = false;
         cargandoGeneral.value = false;
-        toast.add({ severity: 'success', summary: 'Exito', detail: 'Pregunta guardada correctamente', life: 10000 });
+        toast.add({ severity: 'success', summary: 'Éxito', detail: 'Pregunta guardada correctamente', life: 10000 });
         consultarPreguntas();
     } catch (error) {
         console.log(error);
@@ -289,25 +314,36 @@ const guardarPreguntaServidor = async () => {
 const editarPreguntaServidor = async () => {
     cargandoGeneral.value = true;
     sinPreguntasAsignadas.value = false;
+
+    // Crear un nuevo objeto FormData
+    const formData = new FormData();
+
+    // Agrega los datos de la pregunta
+    formData.append('pregunta_id', idPregunta.value);
+    formData.append('contenido', enunciado.value);
+    formData.append('valor', valor.value);
+
+    // Agrega las imágenes seleccionadas (si las hay)
+    files.value.forEach((file) => {
+        formData.append('imagenes[]', file); // Asegúrate de que el nombre coincide con lo que esperas en el backend
+    });
+
     try {
         const token = userData1.access_token;
         const response = await axios.post(
             URL + 'editar-pregunta',
-            {
-                pregunta_id: idPregunta.value,
-                contenido: enunciado.value,
-                valor: valor.value
-            },
+            formData, // Enviamos el FormData
             {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data', // Asegúrate de que el tipo de contenido sea multipart/form-data
                     Authorization: `Bearer ${token}`
                 }
             }
         );
+
         verModalCrearPregunta.value = false;
         cargandoGeneral.value = false;
-        toast.add({ severity: 'success', summary: 'Exito', detail: 'Pregunta actualizada correctamente', life: 10000 });
+        toast.add({ severity: 'success', summary: 'Éxito', detail: 'Pregunta actualizada correctamente', life: 10000 });
         consultarPreguntas();
     } catch (error) {
         console.log(error);
@@ -443,6 +479,28 @@ const confirmarEliminacionOpcion = (event, idOpcion) => {
     });
 };
 
+const confirmarEliminacionImg = (event, idImg) => {
+    idImagen.value = idImg;
+    confirm.require({
+        target: event.currentTarget,
+        message: '¿Está seguro de eliminar la imagen?',
+        icon: 'pi pi-info-circle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Eliminar',
+            severity: 'danger'
+        },
+        accept: () => {
+            eliminarImagenServidor();
+        },
+        reject: () => {}
+    });
+};
+
 const eliminarOpcionServidor = async () => {
     cargandoGeneral.value = true;
 
@@ -460,6 +518,32 @@ const eliminarOpcionServidor = async () => {
         mostrarModalCrearOpcion.value = false;
         cargandoGeneral.value = false;
         toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Opción eliminada con exito`, life: 10000 });
+        consultarPreguntas();
+    } catch (error) {
+        console.log(error);
+        const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        cargandoGeneral.value = false;
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error al eliminar: ${errorMessage}`, life: 10000 });
+    }
+};
+
+const eliminarImagenServidor = async () => {
+    cargandoGeneral.value = true;
+
+    try {
+        const token = userData1.access_token;
+        const response = await axios.delete(URL + 'eliminar-imagen/' + idImagen.value, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        console.log('eliminando imagen: ', response);
+
+        mostrarModalCrearOpcion.value = false;
+        cargandoGeneral.value = false;
+        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Imagen eliminada con exito`, life: 10000 });
         consultarPreguntas();
     } catch (error) {
         console.log(error);
@@ -529,28 +613,12 @@ const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
     totalSizePercent.value = totalSize.value / 10;
 };
 
-const onClearTemplatingUpload = (clear) => {
-    clear();
-    totalSize.value = 0;
-    totalSizePercent.value = 0;
-};
-
 const onSelectedFiles = (event) => {
     console.log('hi');
     files.value = event.files;
     files.value.forEach((file) => {
         totalSize.value += parseInt(formatSize(file.size));
     });
-};
-
-const uploadEvent = (callback) => {
-    totalSizePercent.value = totalSize.value / 10;
-    callback();
-};
-
-const onTemplatedUpload = () => {
-    console.log('Hola,');
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 };
 
 const formatSize = (bytes) => {
