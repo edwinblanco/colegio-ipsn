@@ -7,6 +7,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
+import InfromeExamenEstudiantes from './Componentes/InfromeExamenEstudiantes.vue';
 import Cargando from './Componentes/Cargando.vue';
 import PreguntasModal from './Componentes/PreguntasModal.vue';
 
@@ -39,6 +40,7 @@ const minDate = new Date();
 const idExamen = ref(null);
 const editarExamen = ref(false);
 const headerModalExamen = ref('Crear examen');
+const verModalInformeExamen = ref(false);
 
 onMounted(() => {
     // Validar el token
@@ -131,6 +133,11 @@ function abrirModalAsignarExamenGrado(data) {
     verModalAsginarExamenGrupo.value = true;
 }
 
+function abrirModalInfromeExamen(data) {
+    examenSeleccionado.value = data;
+    verModalInformeExamen.value = true;
+}
+
 function cerrarModalPreguntas() {
     examenSeleccionado.value = null;
     verModalPreguntas.value = false;
@@ -139,6 +146,11 @@ function cerrarModalPreguntas() {
 function cerrarModalAsignarExamenGrado() {
     examenSeleccionado.value = null;
     verModalAsginarExamenGrupo.value = false;
+}
+
+function cerrarModalInformeExamen() {
+    examenSeleccionado.value = null;
+    verModalInformeExamen.value = false;
 }
 
 function ocultarModalCrearExamen() {
@@ -447,6 +459,7 @@ const eliminarExamenServidor = async () => {
                     <template #body="slotProps">
                         <Button icon="pi pi-question" outlined rounded class="mr-2" @click="abrirModalPreguntas(slotProps.data)" v-tooltip="{ value: 'Gestionar preguntas del examen', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalInfromeExamen(slotProps.data)" v-tooltip="{ value: 'Ver Informe', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarExamen(slotProps.data)" />
                     </template>
@@ -456,6 +469,7 @@ const eliminarExamenServidor = async () => {
 
         <PreguntasModal v-if="verModalPreguntas" :verModal="verModalPreguntas" :examen="examenSeleccionado" @ocultarModalPreguntas="cerrarModalPreguntas" />
         <AsignarExamenGrado v-if="verModalAsginarExamenGrupo" :verModal="verModalAsginarExamenGrupo" :examen="examenSeleccionado" @ocultarModalAsignarExamenGrado="cerrarModalAsignarExamenGrado" />
+        <InfromeExamenEstudiantes v-if="verModalInformeExamen" :verModal="verModalInformeExamen" :examen="examenSeleccionado" @ocultarInformeExamen="cerrarModalInformeExamen" />
 
         <Dialog v-model:visible="verModalCrearExamen" :style="{ width: '750px' }" :header="headerModalExamen" :modal="true" :draggable="false" @hide="ocultarModalCrearExamen">
             <div class="flex flex-col gap-6">
@@ -499,7 +513,6 @@ const eliminarExamenServidor = async () => {
             </div>
             <template #footer>
                 <Toast />
-                <ConfirmDialog></ConfirmDialog>
                 <Button label="Cancelar" icon="pi pi-times" text @click="ocultarModalCrearExamen" />
                 <Button v-if="!editarExamen" label="Guardar" icon="pi pi-check" @click="guardarExamen" />
                 <Button v-if="editarExamen" label="Editar" icon="pi pi-check" @click="editarExamen2" />

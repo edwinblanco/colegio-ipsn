@@ -43,7 +43,6 @@
                                         <template #content>
                                             <p>
                                                 <b>{{ index + 1 }}. </b> {{ opcion.contenido }} <Tag v-if="opcion.correcta" severity="success" value="Correcta"></Tag><br />
-                                                <ConfirmPopup></ConfirmPopup>
                                                 <Button icon="pi pi-pencil" aria-label="Edit" size="small" @click="editarOpcion(opcion)" />
                                                 <Button class="mx-1" icon="pi pi-trash" size="small" severity="danger" @click="confirmarEliminacionOpcion($event, opcion.id)"></Button>
                                             </p>
@@ -53,7 +52,6 @@
                             </div>
                         </div>
                         <Divider />
-                        <ConfirmPopup></ConfirmPopup>
                         <Button label="Eliminar pregunta" severity="danger" raised class="my-2" @click="confirmarEliminacionPregunta($event, pregunta.code)" />
                         <Button label="Agregar opción" severity="primary" raised class="m-2" @click="mostrarModalCrearOpcionf(pregunta.code)" />
                     </AccordionContent>

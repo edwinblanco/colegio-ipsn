@@ -31,7 +31,6 @@
                 </Column>
                 <Column field="name" >
                     <template #body="slotProps"">
-                        <ConfirmPopup></ConfirmPopup>
                         <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmarEliminarAsignacion($event, slotProps.data.examenId, slotProps.data.gradoId )"/>
                     </template>
                 </Column>
@@ -58,7 +57,7 @@ import { onMounted, ref } from 'vue';
 import Cargando from './Cargando.vue';
 import Cargando2 from './Cargando2.vue';
 
-const confirm = useConfirm();
+const confirm1 = useConfirm();
 const toast = useToast();
 const emit = defineEmits(['ocultarModalAsignarExamenGrado']);
 const props = defineProps({
@@ -194,7 +193,7 @@ const asignarExamenAgrado = async () => {
 };
 
 const confirmarEliminarAsignacion = (event, examenId, gradoId) => {
-    confirm.require({
+    confirm1.require({
         target: event.currentTarget,
         message: '¿Está seguro de eliminar la asignación?',
         icon: 'pi pi-info-circle',
@@ -211,7 +210,6 @@ const confirmarEliminarAsignacion = (event, examenId, gradoId) => {
             eliminarAsignacionServidor(examenId, gradoId);
         },
         reject: () => {
-            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
         }
     });
 };
