@@ -20,22 +20,22 @@
             </div>
 
             <DataTable v-if="estudiantes.length > 0" :value="estudiantes" size="small" class="bg-white shadow-md border">
-                <Column field="nombre" header="Estudiante">
+                <Column field="nombre" header="Estudiante" sortable >
                     <template #body="slotProps">
                         {{ slotProps.data.nombre }}
                     </template>
                 </Column>
-                <Column field="fecha_presentacion" header="Fecha presentación">
+                <Column field="fecha_presentacion" header="Fecha presentación" sortable >
                     <template #body="slotProps">
                         {{ slotProps.data.fecha_presentacion }}
                     </template>
                 </Column>
-                <Column field="estado_entrega" header="Estado entrega">
+                <Column field="estado_entrega" header="Estado entrega" sortable >
                     <template #body="slotProps">
                         {{ slotProps.data.estado_entrega }}
                     </template>
                 </Column>
-                <Column field="estado_entrega" header="Tiempo de Entrega">
+                <Column field="estado_entrega" header="Tiempo de Entrega" sortable >
                     <template #body="slotProps">
                         <Tag
                             v-if="slotProps.data.estado_entrega == 'A tiempo' && slotProps.data.estado == 'completado'"
@@ -49,12 +49,12 @@
                         ></Tag>
                     </template>
                 </Column>
-                <Column field="estado" header="Estado presentación">
+                <Column field="estado" header="Estado presentación" sortable >
                     <template #body="slotProps">
                         {{ slotProps.data.estado }}
                     </template>
                 </Column>
-                <Column field="puntaje" header="Nota">
+                <Column field="puntaje" header="Nota" sortable >
                     <template #body="slotProps">
                         {{ slotProps.data.puntaje }}
                     </template>
@@ -65,11 +65,11 @@
                         <Tag v-if="slotProps.data.puntaje < 60 && slotProps.data.estado == 'completado'" severity="danger" value="Reprobó"></Tag>
                     </template>
                 </Column>
-                <!--<Column field="name" >
+                <Column field="" header="Respuestas">
                     <template #body="slotProps"">
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmarEliminarAsignacion($event, slotProps.data.examenId, slotProps.data.gradoId )"/>
+                        <Button icon="pi pi-eye" size="small" severity="info" @click="verModalRespuestas(slotProps.data.id)"/>
                     </template>
-                </Column>-->
+                </Column>
             </DataTable>
             <Message v-if="estudiantes.length < 1 && !cargandoGeneral2" severity="warn" class="my-2">Sin informe</Message>
             <Cargando2 v-if="cargandoGeneral2" />
@@ -78,6 +78,52 @@
             </div>
         </Dialog>
     </div>
+
+    <Dialog v-model:visible="abrirModalRespuestas" header="Respuestas" maximizable modal @hide="abrirModalRespuestas = false" :style="{ width: '90rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+
+        <DataTable v-if="preguntas.length > 0" :value="preguntas" size="small" class="bg-white shadow-md border">
+            <Column field="pregunta" header="Pregunta" sortable >
+                <template #body="slotProps">
+                    {{ slotProps.data.pregunta }}
+                </template>
+            </Column>
+            <Column field="valor" header="% valor" sortable >
+                <template #body="slotProps">
+                    {{ slotProps.data.valor }} %
+                </template>
+            </Column>
+            <Column field="respuesta_correcta" header="Respuesta correcta" sortable >
+                <template #body="slotProps">
+                    {{ slotProps.data.respuesta_correcta }}
+                </template>
+            </Column>
+            <Column field="respuesta_seleccionada" header="Respuesta seleccionada" sortable >
+                <template #body="slotProps">
+                    {{ slotProps.data.respuesta_seleccionada }}
+                </template>
+            </Column>
+            <Column field="respuesta_seleccionada" header="" sortable >
+                <template #body="slotProps">
+                    <Tag v-if="slotProps.data.correcta" 
+                        severity="success" 
+                        value="Respuesta correcta" 
+                        icon="pi pi-check">
+                    </Tag>
+
+                    <Tag v-if="!slotProps.data.correcta" 
+                        severity="danger" 
+                        value="Respuesta incorrecta" 
+                        icon="pi pi-times">
+                    </Tag>
+                </template>
+            </Column>
+        </DataTable>
+
+        <Cargando2 v-if="cargandoRespuestas" />
+        <p v-if="preguntas.length == 0 && !cargandoRespuestas" class="text-center">Sin respuestas registradas</p>
+
+    </Dialog>
+
 </template>
 
 <script setup>
@@ -102,8 +148,11 @@ const userData1 = store.getters['auth/getUser'];
 const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 
 const abrirModal = ref(props.verModal);
+const abrirModalRespuestas = ref(false);
 const cargandoGeneral2 = ref(false);
+const cargandoRespuestas = ref(false);
 const estudiantes = ref([]);
+const preguntas = ref([]);
 
 onMounted(() => {
     // Validar el token
@@ -133,4 +182,35 @@ const consultarInforme = async () => {
         cargandoGeneral2.value = false;
     }
 };
+
+const verModalRespuestas = (id) => {
+    abrirModalRespuestas.value = true;
+    consultarRespuestasEstudiante(id);
+}
+
+const consultarRespuestasEstudiante = async (idEstudiante) => {
+    // Obtener el token Bearer
+    const token = userData1.access_token;
+    cargandoRespuestas.value = true;
+    preguntas.value = [];
+
+    try {
+        const response = await axios.get(URL + `ver-examen-estudiante/${props.examen.code}/${idEstudiante}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Agregar el Bearer token
+                Accept: 'application/json', // Tipo de respuesta aceptada
+                'Content-Type': 'application/json' // Tipo de contenido
+            }
+        });
+
+        preguntas.value = response.data.preguntas;
+        cargandoRespuestas.value = false;
+
+        console.log('Datos respuestas est: ', response);
+    } catch (err) {
+        console.log('Error al obtener datos de respuestas est: ', err); // Manejo de errores
+        cargandoRespuestas.value = false;
+    }
+};
+
 </script>
