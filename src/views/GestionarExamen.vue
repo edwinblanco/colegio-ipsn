@@ -459,7 +459,7 @@ const eliminarExamenServidor = async () => {
                     <template #body="slotProps">
                         <Button icon="pi pi-question" outlined rounded class="mr-2" @click="abrirModalPreguntas(slotProps.data)" v-tooltip="{ value: 'Gestionar preguntas del examen', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalAsignarExamenGrado(slotProps.data)" v-tooltip="{ value: 'Asignar examen', showDelay: 0, hideDelay: 0 }" />
-                        <Button icon="pi pi-users" outlined rounded class="mr-2" @click="abrirModalInfromeExamen(slotProps.data)" v-tooltip="{ value: 'Ver Informe', showDelay: 0, hideDelay: 0 }" />
+                        <Button icon="pi pi-chart-line" outlined rounded class="mr-2" @click="abrirModalInfromeExamen(slotProps.data)" v-tooltip="{ value: 'Ver Informe', showDelay: 0, hideDelay: 0 }" />
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarExamen(slotProps.data)" />
                     </template>
