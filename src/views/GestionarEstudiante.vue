@@ -15,23 +15,18 @@ const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 const gradoSeleccionado = ref(null);
 const grados = ref([]);
 const estudiantes = ref([]);
-const descripcion = ref('');
-const tituloExamen = ref('');
-const fechaLimite = ref(null);
-const estadoExamen = ref(null);
 const verCargandoSpiner = ref(false);
 const toast = useToast();
 const confirm = useConfirm();
 const dt = ref();
-const verModalCrearExamen = ref(false);
 const selectedProducts = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const submitted = ref(false);
-const idExamen = ref(null);
-const editarExamen = ref(false);
-const headerModalExamen = ref('Crear examen');
+const idEstudiante = ref(null);
+const editarEstudiante = ref(false);
+const headerModalEstudiante = ref('Crear estudiante');
 
 const verModalCrearEstudiante = ref(false);
 const primerNombre = ref(null);
@@ -111,10 +106,19 @@ function abrirModalEstudiante() {
 }
 
 function ocultarModalCrearEstudiante() {
-    editarExamen.value = false;
-    headerModalExamen.value = 'Crear estudiante';
+    editarEstudiante.value = false;
+    headerModalEstudiante.value = 'Crear estudiante';
     verModalCrearEstudiante.value = false;
     submitted.value = false;
+
+    primerNombre.value = null;
+    segundoApellido.value = null;
+    primerApellido.value = null;
+    segundoNombre.value = null;
+    numeroDocumento.value = null;
+    email.value = null;
+    estadoEstudiante.value = null;
+    gradoSeleccionado.value = null;
 }
 
 function guardarEstudiante() {
@@ -131,16 +135,16 @@ function guardarEstudiante() {
     confirmarCreacionEstudiante();
 }
 
-function editarExamen2() {
+function editarEstudiante2() {
     submitted.value = true;
 
     // Verificar si alguno de los campos está vacío
-    if (!gradoSeleccionado.value || !tituloExamen.value || !fechaLimite.value || !estadoExamen.value) {
+    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !estadoEstudiante.value) {
         console.log('Error: Todos los campos son obligatorios.');
         return; // No continuar si algún campo está vacío
     }
 
-    confirmarEditarExamen();
+    confirmarEditarEstudiante();
 }
 
 const confirmarCreacionEstudiante = () => {
@@ -204,7 +208,7 @@ const guardarEstudianteServidor = async () => {
         numeroDocumento.value = null;
         email.value = null;
         estadoEstudiante.value = null;
-        gradoSeleccionado.value;
+        gradoSeleccionado.value = null;
     } catch (error) {
         verCargandoSpiner.value = false;
         console.log(error);
@@ -216,9 +220,9 @@ const guardarEstudianteServidor = async () => {
     }
 };
 
-const confirmarEditarExamen = () => {
+const confirmarEditarEstudiante = () => {
     confirm.require({
-        message: '¿está seguro de editar el examen?',
+        message: '¿está seguro de editar el estudiante?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
@@ -230,7 +234,7 @@ const confirmarEditarExamen = () => {
             label: 'Editar'
         },
         accept: () => {
-            editarExamenServidor();
+            editarEstudianteServidor();
         },
         reject: () => {
             //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -238,20 +242,23 @@ const confirmarEditarExamen = () => {
     });
 };
 
-const editarExamenServidor = async () => {
+const editarEstudianteServidor = async () => {
     try {
         verCargandoSpiner.value = true;
         const token = userData1.access_token; // Reemplaza esto con tu token Bearer real
-        const response = await axios.post(
-            URL + 'editar-examen',
+        const response = await axios.put(
+            URL + 'actualizar-estudiante/' + idEstudiante.value,
             {
-                examen_id: idExamen.value,
-                materia_id: gradoSeleccionado.value.code,
-                profesor_id: userData1.user.id,
-                descripcion: descripcion.value,
-                titulo: tituloExamen.value,
-                fecha_limite: convertirAFechaMySQL(fechaLimite.value),
-                estado: estadoExamen.value
+                primer_nombre: primerNombre.value,
+                segundo_nombre: segundoNombre.value,
+                primer_apellido: primerApellido.value,
+                segundo_apellido: segundoApellido.value,
+                numero_documento: numeroDocumento.value,
+                fecha_nacimiento: convertirAFechaMySQL(fechaNacimiento.value),
+                email: email.value,
+                password: numeroDocumento.value,
+                estado: estadoEstudiante.value,
+                grado_id: gradoSeleccionado.value.code
             },
             {
                 headers: {
@@ -264,37 +271,44 @@ const editarExamenServidor = async () => {
         console.log('respuesta editar: ', response);
         verCargandoSpiner.value = false;
         ocultarModalCrearEstudiante();
-        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Examen actualizado', life: 6000 });
+        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Estudiante actualizado', life: 6000 });
         consultarEstudiantes();
 
-        idExamen.value = null;
-        tituloExamen.value = null;
-        estadoExamen.value = null;
-        descripcion.value = null;
-        fechaLimite.value = null;
+        primerNombre.value = null;
+        segundoApellido.value = null;
+        primerApellido.value = null;
+        segundoNombre.value = null;
+        numeroDocumento.value = null;
+        email.value = null;
+        estadoEstudiante.value = null;
         gradoSeleccionado.value = null;
     } catch (error) {
         const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
+        if (error.status == 422) {
+            errorMessage = error.response.data.message;
+        }
         toast.add({ severity: 'error', summary: 'Error', detail: `Error: ${errorMessage}`, life: 10000 });
-        console.log('error editando el examen: ', error);
+        console.log('error editando el estudiante: ', error);
         verCargandoSpiner.value = false;
     }
 };
 
-const abrirModalEditarExamen = (examen) => {
-    idExamen.value = examen.code;
-    tituloExamen.value = examen.titulo;
-    estadoExamen.value = examen.estado;
-    descripcion.value = examen.descripcion;
-    fechaLimite.value = examen.fecha_limite;
+const abrirModalEditarExamen = (estudiante) => {
+    idEstudiante.value = estudiante.id;
+    let grado = { name: estudiante.grado.grado + ' - ' + estudiante.grado.salon, code: estudiante.grado.id };
+    gradoSeleccionado.value = grado;
+    editarEstudiante.value = true;
+    headerModalEstudiante.value = 'Editar  estudiante';
+    primerNombre.value = estudiante.primer_nombre;
+    segundoApellido.value = estudiante.segundo_apellido;
+    primerApellido.value = estudiante.primer_apellido;
+    segundoNombre.value = estudiante.segundo_nombre;
+    numeroDocumento.value = estudiante.numero_documento;
+    fechaNacimiento.value = estudiante.fecha_nacimiento;
+    email.value = estudiante.email;
+    estadoEstudiante.value = estudiante.estado;
 
-    let materia = { name: examen.materia.nombre, code: examen.materia.id, bg_color: examen.materia.bg_color };
-
-    gradoSeleccionado.value = materia;
-    editarExamen.value = true;
-    headerModalExamen.value = 'Editar  examen';
-
-    verModalCrearExamen.value = true;
+    verModalCrearEstudiante.value = true;
 };
 
 const convertirAFechaMySQL = (fechaISO) => {
@@ -314,12 +328,12 @@ const convertirAFechaMySQL = (fechaISO) => {
     return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 };
 
-const confirmarEliminarExamen = (examen) => {
-    idExamen.value = examen.code;
-    gradoSeleccionado.value = { name: examen.materia.nombre, code: examen.materia.id, bg_color: examen.materia.bg_color };
+const confirmarEliminarEstudiante = (estudiante) => {
+    idEstudiante.value = estudiante.id;
+    gradoSeleccionado.value = { name: estudiante.grado.grado+' - '+estudiante.grado.salon, code: estudiante.grado.id};
 
     confirm.require({
-        message: '¿está seguro de eliminar el examen?',
+        message: '¿está seguro de eliminar el estudiante?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
@@ -331,7 +345,7 @@ const confirmarEliminarExamen = (examen) => {
             label: 'Eliminar'
         },
         accept: () => {
-            eliminarExamenServidor();
+            eliminarEstudianteServidor();
         },
         reject: () => {
             //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -339,18 +353,18 @@ const confirmarEliminarExamen = (examen) => {
     });
 };
 
-const eliminarExamenServidor = async () => {
+const eliminarEstudianteServidor = async () => {
     verCargandoSpiner.value = true;
 
     try {
         const token = userData1.access_token;
-        const response = await axios.delete(URL + 'eliminar-examen/' + idExamen.value, {
+        const response = await axios.delete(URL + 'eliminar-estudiante/' + idEstudiante.value, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             }
         });
-        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Examen eliminado con exito`, life: 10000 });
+        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Estudiante eliminado con exito`, life: 10000 });
         verCargandoSpiner.value = false;
         consultarEstudiantes();
     } catch (error) {
@@ -416,14 +430,14 @@ const eliminarExamenServidor = async () => {
                 <ConfirmDialog></ConfirmDialog>
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar examen', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar examen', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarExamen(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar estudiante', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar estudiante', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarEstudiante(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="verModalCrearEstudiante" :style="{ width: '750px' }" header="Crear Estudiante" :modal="true" :draggable="false" @hide="ocultarModalCrearEstudiante">
+        <Dialog v-model:visible="verModalCrearEstudiante" :style="{ width: '750px' }" :header="headerModalEstudiante" :modal="true" :draggable="false" @hide="ocultarModalCrearEstudiante">
             <div class="flex flex-col gap-6">
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
@@ -483,7 +497,8 @@ const eliminarExamenServidor = async () => {
             <template #footer>
                 <Toast />
                 <Button label="Cancelar" icon="pi pi-times" text @click="ocultarModalCrearEstudiante" />
-                <Button label="Guardar" icon="pi pi-check" @click="guardarEstudiante" />
+                <Button v-if="!editarEstudiante" label="Guardar" icon="pi pi-check" @click="guardarEstudiante" />
+                <Button v-if="editarEstudiante" label="Editar" icon="pi pi-check" @click="editarEstudiante2" />
             </template>
         </Dialog>
     </div>

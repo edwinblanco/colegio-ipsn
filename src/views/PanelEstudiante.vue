@@ -48,6 +48,7 @@ const consultarMaterias = async () => {
 
     // Obtener el token Bearer
     const token = userData1.access_token;
+    verCargandoSpiner.value = true;
 
     try {
         const response = await axios.get(URL + 'materias', {
@@ -66,8 +67,10 @@ const consultarMaterias = async () => {
         });
 
         materias.value = materiasList;
+        verCargandoSpiner.value = false;
     } catch (err) {
-        console.log('Error al obtener datos: ' + err); // Manejo de errores
+        verCargandoSpiner.value = false;
+        alert('Error al obtener datos: ' + err); // Manejo de errores
     }
 };
 
@@ -86,7 +89,7 @@ const consultarExamenes = async (materia) => {
             }
         });
 
-        console.log('examens: ', response);
+        //console.log('examens: ', response);
 
         let examenesList = [];
 
@@ -246,6 +249,9 @@ const convertirAFechaMySQL = (fechaISO) => {
                     </template>
                 </Column>
             </DataTable>
+
+            <p v-if="!verCargandoSpiner && examenes.length == 0" class="card text-center">Sin exámenes asignados</p>
+
         </div>
 
         <PresentarExamenModal v-if="verModalPresentarExamen" :verModal="verModalPresentarExamen" :examen="examenSeleccionado" @ocultarModalAsignarExamenGrado="cerrarModalPresentarExamen" />

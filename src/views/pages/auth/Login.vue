@@ -20,8 +20,6 @@ const mostrarPasswordReq = ref(false);
 const cargando = ref(false);
 
 watch([numDocumento, password], ([newDocumento, newPassword], [oldDocumento, oldPassword]) => {
-    //console.log(`Documento cambió de ${oldDocumento} a ${newDocumento}`);
-    //console.log(`Password cambió de ${oldPassword} a ${newPassword}`);
 
     // Restablece el mensaje de error
     errorInicioSesion.value = '';
@@ -49,9 +47,16 @@ const iniciarSesion = async () => {
 
         // Almacenar la información del usuario en Vuex
         store.dispatch('auth/login', userData);
-
         cargando.value = false;
-        router.push('/dashboard');
+
+        if (userData.roles.includes('profesor')) {
+            router.push('/gestionar-examen');
+        } else if (userData.roles.includes('estudiante')) {
+            router.push('/panel-estudiante');
+        } else if (userData.roles.includes('admin')){
+            router.push('/conf-imagenes-principales');
+        }
+
     } catch (error) {
         cargando.value = false;
         if (error.response.data.msg) {
@@ -92,7 +97,7 @@ const iniciarSesion = async () => {
 
                         <Message v-if="errorInicioSesion" severity="error" class="mb-4">{{ errorInicioSesion }}</Message>
 
-                        <Button label="Ingresar" class="w-full" @click="iniciarSesion" :disabled="!mostrarBotoningresar" :loading="cargando"></Button>
+                        <Button icon="pi pi-user" label="Ingresar" class="w-full" @click="iniciarSesion" :disabled="!mostrarBotoningresar" :loading="cargando"></Button>
                     </form>
                 </div>
             </div>
