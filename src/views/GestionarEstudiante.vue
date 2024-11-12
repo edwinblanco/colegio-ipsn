@@ -13,8 +13,10 @@ const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 
 // cargar grados
 const gradoSeleccionado = ref(null);
+const sedeSeleccionada = ref(null);
 const grados = ref([]);
 const estudiantes = ref([]);
+const sedes = ref([]);
 const verCargandoSpiner = ref(false);
 const toast = useToast();
 const confirm = useConfirm();
@@ -43,6 +45,7 @@ onMounted(() => {
     validarToken(userData1);
     // Se cargan las grados del profesor
     consultarGrados();
+    consultarSedes();
     consultarEstudiantes();
 });
 
@@ -68,6 +71,35 @@ const consultarGrados = async () => {
         });
 
         grados.value = gradosList;
+        verCargandoSpiner.value = false;
+    } catch (err) {
+        verCargandoSpiner.value = false;
+        console.log('Error al obtener datos: ' + err.message); // Manejo de errores
+    }
+};
+
+const consultarSedes = async () => {
+    const id = userData1.user.id; // Obtener el ID del usuario
+    const token = userData1.access_token;
+    verCargandoSpiner.value = true;
+
+    try {
+        const response = await axios.get(URL + `ver-sedes`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Agregar el Bearer token
+                Accept: 'application/json', // Tipo de respuesta aceptada
+                'Content-Type': 'application/json' // Tipo de contenido
+            }
+        });
+
+        let sedesList = [];
+
+        response.data.data.map((num, index) => {
+            let grado = { name: num.nombre, code: num.id };
+            sedesList.push(grado);
+        });
+
+        sedes.value = sedesList;
         verCargandoSpiner.value = false;
     } catch (err) {
         verCargandoSpiner.value = false;
@@ -119,13 +151,14 @@ function ocultarModalCrearEstudiante() {
     email.value = null;
     estadoEstudiante.value = null;
     gradoSeleccionado.value = null;
+    sedeSeleccionada.value = null;
 }
 
 function guardarEstudiante() {
     submitted.value = true;
 
     // Verificar si alguno de los campos está vacío
-    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !estadoEstudiante.value) {
+    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !sedeSeleccionada.value || !estadoEstudiante.value) {
         console.log('Error: Todos los campos son obligatorios.');
         return; // No continuar si algún campo está vacío
     }
@@ -139,7 +172,7 @@ function editarEstudiante2() {
     submitted.value = true;
 
     // Verificar si alguno de los campos está vacío
-    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !estadoEstudiante.value) {
+    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !sedeSeleccionada.value || !estadoEstudiante.value) {
         console.log('Error: Todos los campos son obligatorios.');
         return; // No continuar si algún campo está vacío
     }
@@ -185,7 +218,8 @@ const guardarEstudianteServidor = async () => {
                 email: email.value,
                 password: numeroDocumento.value,
                 estado: estadoEstudiante.value,
-                grado_id: gradoSeleccionado.value.code
+                grado_id: gradoSeleccionado.value.code,
+                sede_id: sedeSeleccionada.value.code
             },
             {
                 headers: {
@@ -209,6 +243,7 @@ const guardarEstudianteServidor = async () => {
         email.value = null;
         estadoEstudiante.value = null;
         gradoSeleccionado.value = null;
+        sedeSeleccionada.value = null;
     } catch (error) {
         verCargandoSpiner.value = false;
         console.log(error);
@@ -258,7 +293,8 @@ const editarEstudianteServidor = async () => {
                 email: email.value,
                 password: numeroDocumento.value,
                 estado: estadoEstudiante.value,
-                grado_id: gradoSeleccionado.value.code
+                grado_id: gradoSeleccionado.value.code,
+                sede_id: sedeSeleccionada.value.code
             },
             {
                 headers: {
@@ -282,6 +318,7 @@ const editarEstudianteServidor = async () => {
         email.value = null;
         estadoEstudiante.value = null;
         gradoSeleccionado.value = null;
+        sedeSeleccionada.value = null;
     } catch (error) {
         const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
         if (error.status == 422) {
@@ -296,7 +333,9 @@ const editarEstudianteServidor = async () => {
 const abrirModalEditarExamen = (estudiante) => {
     idEstudiante.value = estudiante.id;
     let grado = { name: estudiante.grado.grado + ' - ' + estudiante.grado.salon, code: estudiante.grado.id };
+    let sede = { name: estudiante.sede.nombre, code: estudiante.sede.id}
     gradoSeleccionado.value = grado;
+    sedeSeleccionada.value = sede;
     editarEstudiante.value = true;
     headerModalEstudiante.value = 'Editar  estudiante';
     primerNombre.value = estudiante.primer_nombre;
@@ -331,6 +370,7 @@ const convertirAFechaMySQL = (fechaISO) => {
 const confirmarEliminarEstudiante = (estudiante) => {
     idEstudiante.value = estudiante.id;
     gradoSeleccionado.value = { name: estudiante.grado.grado+' - '+estudiante.grado.salon, code: estudiante.grado.id};
+    sedeSeleccionada.value = { name: estudiante.sede.nombre, code: estudiante.sede.code };
 
     confirm.require({
         message: '¿está seguro de eliminar el estudiante?',
@@ -378,7 +418,7 @@ const eliminarEstudianteServidor = async () => {
 
 <template>
     <div>
-        <div class="card" v-if="grados">
+        <div class="card" v-if="grados && sedes">
             <Toolbar class="mb-1">
                 <template #start>
                     <Button label="Crear estudiante" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalEstudiante" />
@@ -427,7 +467,6 @@ const eliminarEstudianteServidor = async () => {
                     </template>
                 </Column>
                 <Toast />
-                <ConfirmDialog></ConfirmDialog>
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar estudiante', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
@@ -444,6 +483,11 @@ const eliminarEstudianteServidor = async () => {
                         <label for="name" class="block font-bold mb-3">Grado</label>
                         <Select v-if="grados" v-model="gradoSeleccionado" :options="grados" optionLabel="name" placeholder="Seleccione un grado" fluid />
                         <small v-if="submitted && !gradoSeleccionado" class="text-red-500">Debe seleccionar un grado</small>
+                    </div>
+                    <div class="col-span-6">
+                        <label for="name" class="block font-bold mb-3">Sede</label>
+                        <Select v-if="sedes" v-model="sedeSeleccionada" :options="sedes" optionLabel="name" placeholder="Seleccione una sede" fluid />
+                        <small v-if="submitted && !sedeSeleccionada" class="text-red-500">Debe seleccionar una sede</small>
                     </div>
                     <div class="col-span-6">
                         <label for="primerNombre" class="block font-bold mb-3">Primer Nombre</label>

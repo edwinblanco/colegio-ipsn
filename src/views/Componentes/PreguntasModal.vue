@@ -460,6 +460,7 @@ const confirmarEliminacionOpcion = (event, idOpcion) => {
     confirm.require({
         target: event.currentTarget,
         message: '¿Está seguro de eliminar la opción?',
+        header: 'Confirmación',
         icon: 'pi pi-info-circle',
         rejectProps: {
             label: 'Cancelar',
@@ -482,6 +483,7 @@ const confirmarEliminacionImg = (event, idImg) => {
     confirm.require({
         target: event.currentTarget,
         message: '¿Está seguro de eliminar la imagen?',
+        header: 'Confirmación',
         icon: 'pi pi-info-circle',
         rejectProps: {
             label: 'Cancelar',
@@ -556,6 +558,7 @@ const confirmarEliminacionPregunta = (event, idpregunta) => {
     confirm.require({
         target: event.currentTarget,
         message: '¿Está seguro de eliminar la pregunta?',
+        header: 'Confirmación',
         icon: 'pi pi-info-circle',
         rejectProps: {
             label: 'Cancelar',

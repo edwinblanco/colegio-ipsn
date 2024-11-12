@@ -9,7 +9,11 @@
                         <small v-if="!gradoSeleccionado" class="text-red-500">Debe seleccionar un grado</small>
                     </div>
                     <div class="col-span-3">
-                        <Button type="button" label="Asignar" @click="asignarExamenAgrado()" :disabled="!gradoSeleccionado"></Button>
+                        <Select v-model="sedeSeleccionada" :options="sedes" optionLabel="name" placeholder="Seleccione una sede" fluid />
+                        <small v-if="!sedeSeleccionada" class="text-red-500">Debe seleccionar una sede</small>
+                    </div>
+                    <div class="col-span-3">
+                        <Button type="button" label="Asignar" @click="asignarExamenAgrado()" :disabled="!gradoSeleccionado || !sedeSeleccionada"></Button>
                     </div>
                 </div>
             </div>
@@ -22,6 +26,11 @@
                 <Column field="name" header="Grado">
                     <template #body="slotProps">
                         {{ slotProps.data.name }}
+                    </template>
+                </Column>
+                <Column field="sede" header="Sede">
+                    <template #body="slotProps">
+                        {{ slotProps.data.sede }}
                     </template>
                 </Column>
                 <Column field="name" header="Fecha asignación">
@@ -75,17 +84,20 @@ const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 
 const abrirModal = ref(props.verModal);
 const grados = ref([]);
+const sedes = ref([]);
 const asignaciones = ref([]);
 const verModalCrearPregunta = ref(false);
 const cargandoGrados = ref(true);
 const cargandoGeneral = ref(false);
 const cargandoGeneral2 = ref(false);
 const gradoSeleccionado = ref(null);
+const sedeSeleccionada = ref(null);
 
 onMounted(() => {
     // Validar el token
     validarToken(userData1);
     consultarGrados();
+    consultarSedes();
     consultarAsignaciones();
 });
 
@@ -128,6 +140,45 @@ const consultarGrados = async () => {
     }
 };
 
+const consultarSedes = async () => {
+    // Obtener el token Bearer
+    const token = userData1.access_token;
+
+    //mostrar el spinner de carga de las preguntas
+    cargandoGrados.value = true;
+    sedes.value = [];
+
+    try {
+        const response = await axios.get(URL + 'ver-sedes', {
+            headers: {
+                Authorization: `Bearer ${token}`, // Agregar el Bearer token
+                Accept: 'application/json', // Tipo de respuesta aceptada
+                'Content-Type': 'application/json' // Tipo de contenido
+            }
+        });
+
+        let sedesList = [];
+
+        if (response.data.data.length) {
+            response.data.data.map((num, index) => {
+                let sede = { name: num.nombre, code: num.id };
+                sedesList.push(sede);
+            });
+
+            sedes.value = sedesList;
+
+            //ocultar el spinner de carga de las preguntas
+            cargandoGrados.value = false;
+        } else {
+            //ocultar el spinner de carga de las preguntas
+            cargandoGrados.value = false;
+        }
+    } catch (err) {
+        console.log('Error al obtener datos de sedes: ' + err.message); // Manejo de errores
+        cargandoGrados.value = false;
+    }
+};
+
 const consultarAsignaciones = async () => {
     // Obtener el token Bearer
     const token = userData1.access_token;
@@ -147,12 +198,14 @@ const consultarAsignaciones = async () => {
 
         if(response.data.status !== 0){
             response.data.data.map((num, index) => {
-                let asignacion = { name: num.grado + '-' + num.salon + '°', code: index, examenId: num.pivot.examen_id, gradoId: num.pivot.grado_id, fechaAsig: num.pivot.fecha_asignacion };
+                let asignacion = { name: num.nombre_grado, code: index, fechaAsig: num.fecha_asignacion, sede: num.sede.nombre };
                 asignacionesList.push(asignacion);
             });
 
             asignaciones.value = asignacionesList;
         }
+
+        console.log("Asig: ", response.data.data);
 
         cargandoGeneral2.value = false;
 
@@ -171,7 +224,8 @@ const asignarExamenAgrado = async () => {
             URL + 'asignar-examen-grado',
             {
                 examen_id: props.examen.code,
-                grado_id: gradoSeleccionado.value.code
+                grado_id: gradoSeleccionado.value.code,
+                sede_id: sedeSeleccionada.value.code
             },
             {
                 headers: {
@@ -196,6 +250,7 @@ const confirmarEliminarAsignacion = (event, examenId, gradoId) => {
     confirm1.require({
         target: event.currentTarget,
         message: '¿Está seguro de eliminar la asignación?',
+        header: 'Confirmación',
         icon: 'pi pi-info-circle',
         rejectProps: {
             label: 'Cancelar',

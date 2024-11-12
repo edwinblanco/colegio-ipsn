@@ -361,7 +361,8 @@ const confirmarEliminarExamen = (examen) => {
             outlined: true
         },
         acceptProps: {
-            label: 'Eliminar'
+            label: 'Eliminar',
+            severity: 'danger',
         },
         accept: () => {
             eliminarExamenServidor();
@@ -454,7 +455,6 @@ const eliminarExamenServidor = async () => {
                     </template>
                 </Column>
                 <Toast />
-                <ConfirmDialog></ConfirmDialog>
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
                         <Button icon="pi pi-question" outlined rounded class="mr-2" @click="abrirModalPreguntas(slotProps.data)" v-tooltip="{ value: 'Gestionar preguntas del examen', showDelay: 0, hideDelay: 0 }" />

@@ -137,6 +137,15 @@ function confirmarEliminarImagen(imagen) {
         message: '¿Estás seguro de eliminar esta imagen?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'info',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Eliminar',
+            severity: 'danger',
+        },
         accept: () => {
             eliminarImagenServidor();
         },
@@ -178,7 +187,6 @@ function onFileChange(event) {
 <template>
     <div>
         <Cargando v-if="verCargandoSpiner" />
-        <ConfirmDialog></ConfirmDialog>
 
         <Button label="Agregar Imagen" icon="pi pi-plus" class="my-2" @click="abrirModalCrearImagen" />
 

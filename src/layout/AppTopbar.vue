@@ -4,7 +4,6 @@ import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import AppConfigurator from './AppConfigurator.vue';
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
 
 import Cargando from '@/views/Componentes/Cargando.vue';
@@ -27,6 +26,7 @@ const confirmarCerrarSesion = (event) => {
     confirm.require({
         target: event.currentTarget,
         message: '¿Está segur@ de cerrar sesión?',
+        header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
             label: 'Cancelar',
@@ -34,7 +34,8 @@ const confirmarCerrarSesion = (event) => {
             outlined: true
         },
         acceptProps: {
-            label: 'Cerrar sesión'
+            label: 'Cerrar sesión',
+            severity: 'danger'
         },
         accept: () => {
             //toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
@@ -68,6 +69,7 @@ const logout = async () => {
 </script>
 
 <template>
+    <ConfirmDialog></ConfirmDialog>
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" @click="onMenuToggle">
