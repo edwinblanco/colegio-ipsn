@@ -39,7 +39,13 @@ const numeroDocumento = ref(null);
 const fechaNacimiento = ref(null);
 const email = ref(null);
 const estadoEstudiante = ref(null);
+const rolSeleccionado = ref(null);
 
+const roles = ref([
+    {name: 'profesor', code:'profesor'},
+    {name: 'estudiante', code:'estudiante'},
+    {name: 'administrador', code:'admin'}
+])
 onMounted(() => {
     // Validar el token
     validarToken(userData1);
@@ -457,8 +463,11 @@ const eliminarEstudianteServidor = async () => {
                 <Column field="primer_nombre" header="Primer Nombre" sortable style="min-width: 2rem"></Column>
                 <Column field="segundo_nombre" header="Primer Apellido" sortable style="min-width: 2rem"></Column>
                 <Column field="created_at" header="Fecha Creación" sortable style="min-width: 2rem"></Column>
-                <Column header="Grado" sortable style="min-width: 2rem">
+                <Column field="grado.grado" header="Grado" sortable style="min-width: 2rem">
                     <template #body="slotProps"> {{ slotProps.data.grado.grado }}° - {{ slotProps.data.grado.salon }} </template>
+                </Column>
+                <Column field="sede.nombre" header="Sede" sortable style="min-width: 2rem">
+                    <template #body="slotProps"> {{ slotProps.data.sede.nombre }} </template>
                 </Column>
                 <Column field="estado" header="Estado" sortable style="min-width: 12rem">
                     <template #body="slotProps">
@@ -480,11 +489,16 @@ const eliminarEstudianteServidor = async () => {
             <div class="flex flex-col gap-6">
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
+                        <label for="name" class="block font-bold mb-3">Rol</label>
+                        <Select v-if="sedes" v-model="rolSeleccionado" :options="roles" optionLabel="name" placeholder="Seleccione un rol" fluid />
+                        <small v-if="submitted && !rolSeleccionado" class="text-red-500">Debe seleccionar un rol</small>
+                    </div>
+                    <div v-if="rolSeleccionado && rolSeleccionado.code == 'estudiante'" class="col-span-6">
                         <label for="name" class="block font-bold mb-3">Grado</label>
                         <Select v-if="grados" v-model="gradoSeleccionado" :options="grados" optionLabel="name" placeholder="Seleccione un grado" fluid />
                         <small v-if="submitted && !gradoSeleccionado" class="text-red-500">Debe seleccionar un grado</small>
                     </div>
-                    <div class="col-span-6">
+                    <div v-if="rolSeleccionado && rolSeleccionado.code == 'estudiante'" class="col-span-6">
                         <label for="name" class="block font-bold mb-3">Sede</label>
                         <Select v-if="sedes" v-model="sedeSeleccionada" :options="sedes" optionLabel="name" placeholder="Seleccione una sede" fluid />
                         <small v-if="submitted && !sedeSeleccionada" class="text-red-500">Debe seleccionar una sede</small>

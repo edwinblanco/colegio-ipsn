@@ -32,11 +32,11 @@ const filteredModel = computed(() => {
             const filteredItems = group.items.filter((item) => {
                 // permisos para administrador
                 if (usuario.value.includes('admin') && item.label == 'Imagenes principales') return true; // El admin ve todo Imagenes principales
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Estudiantes') return true;
                 //if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
 
                 // permisos para profesor
                 if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
-                if (usuario.value.includes('profesor') && item.label == 'Gestionar Estudiantes') return true;
 
                 // permisos para estudiante
                 if (usuario.value.includes('estudiante') && item.label == 'Panel Estudiante') return true;
