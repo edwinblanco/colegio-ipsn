@@ -11,7 +11,7 @@ const model = ref([
         items: [
             { label: 'Panel Estudiante', icon: 'pi pi-fw pi-home', to: '/panel-estudiante' },
             { label: 'Gestionar Examen', icon: 'pi pi-fw pi-file-edit', to: '/gestionar-examen' },
-            { label: 'Gestionar Estudiantes', icon: 'pi pi-fw pi-users', to: '/gestionar-estudiantes' }
+            { label: 'Gestionar Usuarios', icon: 'pi pi-fw pi-users', to: '/gestionar-usuarios' }
         ]
     },
     {
@@ -32,7 +32,7 @@ const filteredModel = computed(() => {
             const filteredItems = group.items.filter((item) => {
                 // permisos para administrador
                 if (usuario.value.includes('admin') && item.label == 'Imagenes principales') return true; // El admin ve todo Imagenes principales
-                if (usuario.value.includes('admin') && item.label == 'Gestionar Estudiantes') return true;
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Usuarios') return true;
                 //if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
 
                 // permisos para profesor

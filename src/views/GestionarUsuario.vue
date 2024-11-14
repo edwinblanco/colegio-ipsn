@@ -15,7 +15,7 @@ const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 const gradoSeleccionado = ref(null);
 const sedeSeleccionada = ref(null);
 const grados = ref([]);
-const estudiantes = ref([]);
+const usuarios = ref([]);
 const sedes = ref([]);
 const verCargandoSpiner = ref(false);
 const toast = useToast();
@@ -26,11 +26,11 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const submitted = ref(false);
-const idEstudiante = ref(null);
-const editarEstudiante = ref(false);
-const headerModalEstudiante = ref('Crear estudiante');
+const idUsuario = ref(null);
+const editarUsuario = ref(false);
+const headerModalUsuario = ref('Crear usuario');
 
-const verModalCrearEstudiante = ref(false);
+const verModalCrearUsuario = ref(false);
 const primerNombre = ref(null);
 const segundoNombre = ref(null);
 const primerApellido = ref(null);
@@ -38,21 +38,24 @@ const segundoApellido = ref(null);
 const numeroDocumento = ref(null);
 const fechaNacimiento = ref(null);
 const email = ref(null);
-const estadoEstudiante = ref(null);
+const estadoUsuario = ref(null);
 const rolSeleccionado = ref(null);
+const materias = ref([]);
+const materiasSeleccionadas = ref(null);
 
 const roles = ref([
-    {name: 'profesor', code:'profesor'},
-    {name: 'estudiante', code:'estudiante'},
-    {name: 'administrador', code:'admin'}
-])
+    { name: 'profesor', code: 'profesor' },
+    { name: 'estudiante', code: 'estudiante' },
+    { name: 'administrador', code: 'admin' }
+]);
 onMounted(() => {
     // Validar el token
     validarToken(userData1);
     // Se cargan las grados del profesor
     consultarGrados();
     consultarSedes();
-    consultarEstudiantes();
+    consultarMaterias();
+    consultarUsuarios();
 });
 
 const consultarGrados = async () => {
@@ -77,7 +80,38 @@ const consultarGrados = async () => {
         });
 
         grados.value = gradosList;
+        //verCargandoSpiner.value = false;
+    } catch (err) {
         verCargandoSpiner.value = false;
+        console.log('Error al obtener datos: ' + err.message); // Manejo de errores
+    }
+};
+
+const consultarMaterias = async () => {
+    const id = userData1.user.id; // Obtener el ID del usuario
+    const token = userData1.access_token;
+    verCargandoSpiner.value = true;
+
+    try {
+        const response = await axios.get(URL + `ver-materias`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Agregar el Bearer token
+                Accept: 'application/json', // Tipo de respuesta aceptada
+                'Content-Type': 'application/json' // Tipo de contenido
+            }
+        });
+
+        let materiasList = [];
+
+        response.data.data.map((num, index) => {
+            let materia = { name: num.nombre, materia_id: num.id };
+            materiasList.push(materia);
+        });
+
+        console.log('materias: ', response.data.data);
+
+        materias.value = materiasList;
+        //verCargandoSpiner.value = false;
     } catch (err) {
         verCargandoSpiner.value = false;
         console.log('Error al obtener datos: ' + err.message); // Manejo de errores
@@ -106,21 +140,21 @@ const consultarSedes = async () => {
         });
 
         sedes.value = sedesList;
-        verCargandoSpiner.value = false;
+        //verCargandoSpiner.value = false;
     } catch (err) {
         verCargandoSpiner.value = false;
         console.log('Error al obtener datos: ' + err.message); // Manejo de errores
     }
 };
 
-const consultarEstudiantes = async () => {
+const consultarUsuarios = async () => {
     // Obtener el token Bearer
     const token = userData1.access_token;
     verCargandoSpiner.value = true;
-    estudiantes.value = [];
+    usuarios.value = [];
 
     try {
-        const response = await axios.get(URL + `ver-estudiantes`, {
+        const response = await axios.get(URL + `ver-usuarios`, {
             headers: {
                 Authorization: `Bearer ${token}`, // Agregar el Bearer token
                 Accept: 'application/json', // Tipo de respuesta aceptada
@@ -128,8 +162,8 @@ const consultarEstudiantes = async () => {
             }
         });
 
-        console.log('estudiantes: ', response);
-        estudiantes.value = response.data.data;
+        console.log('usuarios: ', response);
+        usuarios.value = response.data.data;
 
         verCargandoSpiner.value = false;
     } catch (err) {
@@ -138,15 +172,15 @@ const consultarEstudiantes = async () => {
     }
 };
 
-function abrirModalEstudiante() {
+function abrirModalUsuarios() {
     submitted.value = false;
-    verModalCrearEstudiante.value = true;
+    verModalCrearUsuario.value = true;
 }
 
-function ocultarModalCrearEstudiante() {
-    editarEstudiante.value = false;
-    headerModalEstudiante.value = 'Crear estudiante';
-    verModalCrearEstudiante.value = false;
+function ocultarModalCrearUsuario() {
+    editarUsuario.value = false;
+    headerModalUsuario.value = 'Crear usuario';
+    verModalCrearUsuario.value = false;
     submitted.value = false;
 
     primerNombre.value = null;
@@ -155,40 +189,70 @@ function ocultarModalCrearEstudiante() {
     segundoNombre.value = null;
     numeroDocumento.value = null;
     email.value = null;
-    estadoEstudiante.value = null;
+    estadoUsuario.value = null;
     gradoSeleccionado.value = null;
     sedeSeleccionada.value = null;
+    fechaNacimiento.value = null;
+    materiasSeleccionadas.value = null;
+    rolSeleccionado.value = null;
 }
 
-function guardarEstudiante() {
+function guardarUsuario() {
     submitted.value = true;
 
     // Verificar si alguno de los campos está vacío
-    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !sedeSeleccionada.value || !estadoEstudiante.value) {
+    if (!rolSeleccionado.value || !primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !estadoUsuario.value) {
         console.log('Error: Todos los campos son obligatorios.');
         return; // No continuar si algún campo está vacío
+    }
+
+    if (rolSeleccionado.value.code === 'estudiante') {
+        if (!gradoSeleccionado.value || !sedeSeleccionada.value) {
+            console.log('Error: Todos los campos son obligatorios.');
+            return; // No continuar si algún campo está vacío
+        }
+    }
+
+    if (rolSeleccionado.value.code === 'profesor') {
+        if (!materiasSeleccionadas.value) {
+            console.log('Error: Todos los campos son obligatorios.');
+            return; // No continuar si algún campo está vacío
+        }
     }
 
     // Si todos los campos están llenos, proceder con la solicitud
-
-    confirmarCreacionEstudiante();
+    confirmarCreacionUsuario();
 }
 
-function editarEstudiante2() {
+function editarUsuario2() {
     submitted.value = true;
 
     // Verificar si alguno de los campos está vacío
-    if (!primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !gradoSeleccionado.value || !sedeSeleccionada.value || !estadoEstudiante.value) {
+    if (!rolSeleccionado.value || !primerNombre.value || !primerApellido.value || !segundoApellido.value || !numeroDocumento.value || !fechaNacimiento.value || !estadoUsuario.value) {
         console.log('Error: Todos los campos son obligatorios.');
         return; // No continuar si algún campo está vacío
     }
 
-    confirmarEditarEstudiante();
+    if (rolSeleccionado.value.code === 'estudiante') {
+        if (!gradoSeleccionado.value || !sedeSeleccionada.value) {
+            console.log('Error: Todos los campos son obligatorios.');
+            return; // No continuar si algún campo está vacío
+        }
+    }
+
+    if (rolSeleccionado.value.code === 'profesor') {
+        if (!materiasSeleccionadas.value) {
+            console.log('Error: Todos los campos son obligatorios.');
+            return; // No continuar si algún campo está vacío
+        }
+    }
+
+    confirmarEditarUsuario();
 }
 
-const confirmarCreacionEstudiante = () => {
+const confirmarCreacionUsuario = () => {
     confirm.require({
-        message: '¿está seguro de crear el estudiante?',
+        message: '¿está seguro de crear el usuario?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
@@ -200,7 +264,7 @@ const confirmarCreacionEstudiante = () => {
             label: 'Guardar'
         },
         accept: () => {
-            guardarEstudianteServidor();
+            guardarUsuarioServidor();
         },
         reject: () => {
             //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -208,12 +272,12 @@ const confirmarCreacionEstudiante = () => {
     });
 };
 
-const guardarEstudianteServidor = async () => {
+const guardarUsuarioServidor = async () => {
     try {
         verCargandoSpiner.value = true;
         const token = userData1.access_token;
         const response = await axios.post(
-            URL + 'registro-estudiante',
+            URL + 'registro-usuario',
             {
                 primer_nombre: primerNombre.value,
                 segundo_nombre: segundoNombre.value,
@@ -223,9 +287,11 @@ const guardarEstudianteServidor = async () => {
                 fecha_nacimiento: convertirAFechaMySQL(fechaNacimiento.value),
                 email: email.value,
                 password: numeroDocumento.value,
-                estado: estadoEstudiante.value,
-                grado_id: gradoSeleccionado.value.code,
-                sede_id: sedeSeleccionada.value.code
+                estado: estadoUsuario.value,
+                grado_id: rolSeleccionado.value.code == 'estudiante' ? gradoSeleccionado.value.code : null,
+                sede_id: rolSeleccionado.value.code == 'estudiante' ? sedeSeleccionada.value.code : null,
+                materias: rolSeleccionado.value.code == 'profesor' ? materiasSeleccionadas.value : null,
+                rol: rolSeleccionado.value.code
             },
             {
                 headers: {
@@ -237,9 +303,9 @@ const guardarEstudianteServidor = async () => {
 
         console.log('respuesta: ', response);
         verCargandoSpiner.value = false;
-        ocultarModalCrearEstudiante();
-        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'estudiante creado', life: 6000 });
-        consultarEstudiantes();
+        ocultarModalCrearUsuario();
+        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Usuario creado', life: 6000 });
+        consultarUsuarios();
 
         primerNombre.value = null;
         segundoApellido.value = null;
@@ -247,9 +313,12 @@ const guardarEstudianteServidor = async () => {
         segundoNombre.value = null;
         numeroDocumento.value = null;
         email.value = null;
-        estadoEstudiante.value = null;
+        estadoUsuario.value = null;
         gradoSeleccionado.value = null;
         sedeSeleccionada.value = null;
+        fechaNacimiento.value = null;
+        materiasSeleccionadas.value = null;
+        rolSeleccionado.value = null;
     } catch (error) {
         verCargandoSpiner.value = false;
         console.log(error);
@@ -261,9 +330,9 @@ const guardarEstudianteServidor = async () => {
     }
 };
 
-const confirmarEditarEstudiante = () => {
+const confirmarEditarUsuario = () => {
     confirm.require({
-        message: '¿está seguro de editar el estudiante?',
+        message: '¿está seguro de editar el usuario?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
@@ -275,7 +344,7 @@ const confirmarEditarEstudiante = () => {
             label: 'Editar'
         },
         accept: () => {
-            editarEstudianteServidor();
+            editarUsuarioServidor();
         },
         reject: () => {
             //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -283,12 +352,12 @@ const confirmarEditarEstudiante = () => {
     });
 };
 
-const editarEstudianteServidor = async () => {
+const editarUsuarioServidor = async () => {
     try {
         verCargandoSpiner.value = true;
         const token = userData1.access_token; // Reemplaza esto con tu token Bearer real
         const response = await axios.put(
-            URL + 'actualizar-estudiante/' + idEstudiante.value,
+            URL + 'actualizar-usuario/' + idUsuario.value,
             {
                 primer_nombre: primerNombre.value,
                 segundo_nombre: segundoNombre.value,
@@ -298,9 +367,11 @@ const editarEstudianteServidor = async () => {
                 fecha_nacimiento: convertirAFechaMySQL(fechaNacimiento.value),
                 email: email.value,
                 password: numeroDocumento.value,
-                estado: estadoEstudiante.value,
-                grado_id: gradoSeleccionado.value.code,
-                sede_id: sedeSeleccionada.value.code
+                estado: estadoUsuario.value,
+                grado_id: rolSeleccionado.value.code == 'estudiante' ? gradoSeleccionado.value.code : null,
+                sede_id: rolSeleccionado.value.code == 'estudiante' ? sedeSeleccionada.value.code : null,
+                materias: rolSeleccionado.value.code == 'profesor' ? materiasSeleccionadas.value : null,
+                rol: rolSeleccionado.value.code
             },
             {
                 headers: {
@@ -312,9 +383,9 @@ const editarEstudianteServidor = async () => {
 
         console.log('respuesta editar: ', response);
         verCargandoSpiner.value = false;
-        ocultarModalCrearEstudiante();
-        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Estudiante actualizado', life: 6000 });
-        consultarEstudiantes();
+        ocultarModalCrearUsuario();
+        toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Usuario actualizado', life: 6000 });
+        consultarUsuarios();
 
         primerNombre.value = null;
         segundoApellido.value = null;
@@ -322,9 +393,12 @@ const editarEstudianteServidor = async () => {
         segundoNombre.value = null;
         numeroDocumento.value = null;
         email.value = null;
-        estadoEstudiante.value = null;
+        estadoUsuario.value = null;
         gradoSeleccionado.value = null;
         sedeSeleccionada.value = null;
+        fechaNacimiento.value = null;
+        materiasSeleccionadas.value = null;
+        rolSeleccionado.value = null;
     } catch (error) {
         const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
         if (error.status == 422) {
@@ -336,24 +410,44 @@ const editarEstudianteServidor = async () => {
     }
 };
 
-const abrirModalEditarExamen = (estudiante) => {
-    idEstudiante.value = estudiante.id;
-    let grado = { name: estudiante.grado.grado + ' - ' + estudiante.grado.salon, code: estudiante.grado.id };
-    let sede = { name: estudiante.sede.nombre, code: estudiante.sede.id}
-    gradoSeleccionado.value = grado;
-    sedeSeleccionada.value = sede;
-    editarEstudiante.value = true;
-    headerModalEstudiante.value = 'Editar  estudiante';
-    primerNombre.value = estudiante.primer_nombre;
-    segundoApellido.value = estudiante.segundo_apellido;
-    primerApellido.value = estudiante.primer_apellido;
-    segundoNombre.value = estudiante.segundo_nombre;
-    numeroDocumento.value = estudiante.numero_documento;
-    fechaNacimiento.value = estudiante.fecha_nacimiento;
-    email.value = estudiante.email;
-    estadoEstudiante.value = estudiante.estado;
+const abrirModalEditarUsuario = (usuario) => {
+    idUsuario.value = usuario.id;
 
-    verModalCrearEstudiante.value = true;
+    if (usuario.roles.some((obj) => obj.name === 'estudiante')) {
+        rolSeleccionado.value = { name: 'estudiante', code: 'estudiante' };
+        let grado = { name: usuario.grado.grado + ' - ' + usuario.grado.salon, code: usuario.grado.id };
+        let sede = { name: usuario.sede.nombre, code: usuario.sede.id };
+        gradoSeleccionado.value = grado;
+        sedeSeleccionada.value = sede;
+    }
+
+    if (usuario.roles.some((obj) => obj.name === 'profesor')) {
+        let materias = [];
+
+        usuario.materias.forEach((element) => {
+            materias.push({ name: element.nombre, materia_id: element.id });
+        });
+
+        materiasSeleccionadas.value = materias;
+        rolSeleccionado.value = { name: 'profesor', code: 'profesor' };
+    }
+
+    if (usuario.roles.some((obj) => obj.name === 'admin')) {
+        rolSeleccionado.value = { name: 'administrador', code: 'admin' };
+    }
+
+    editarUsuario.value = true;
+    headerModalUsuario.value = 'Editar  usuario';
+    primerNombre.value = usuario.primer_nombre;
+    segundoApellido.value = usuario.segundo_apellido;
+    primerApellido.value = usuario.primer_apellido;
+    segundoNombre.value = usuario.segundo_nombre;
+    numeroDocumento.value = usuario.numero_documento;
+    fechaNacimiento.value = usuario.fecha_nacimiento;
+    email.value = usuario.email;
+    estadoUsuario.value = usuario.estado;
+
+    verModalCrearUsuario.value = true;
 };
 
 const convertirAFechaMySQL = (fechaISO) => {
@@ -373,13 +467,11 @@ const convertirAFechaMySQL = (fechaISO) => {
     return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 };
 
-const confirmarEliminarEstudiante = (estudiante) => {
-    idEstudiante.value = estudiante.id;
-    gradoSeleccionado.value = { name: estudiante.grado.grado+' - '+estudiante.grado.salon, code: estudiante.grado.id};
-    sedeSeleccionada.value = { name: estudiante.sede.nombre, code: estudiante.sede.code };
+const confirmarEliminarUsuario = (estudiante) => {
+    idUsuario.value = estudiante.id;
 
     confirm.require({
-        message: '¿está seguro de eliminar el estudiante?',
+        message: '¿está seguro de eliminar el usuario?',
         header: 'Confirmación',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
@@ -388,10 +480,11 @@ const confirmarEliminarEstudiante = (estudiante) => {
             outlined: true
         },
         acceptProps: {
-            label: 'Eliminar'
+            label: 'Eliminar',
+            severity: 'danger'
         },
         accept: () => {
-            eliminarEstudianteServidor();
+            eliminarUsuarioServidor();
         },
         reject: () => {
             //toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -399,20 +492,20 @@ const confirmarEliminarEstudiante = (estudiante) => {
     });
 };
 
-const eliminarEstudianteServidor = async () => {
+const eliminarUsuarioServidor = async () => {
     verCargandoSpiner.value = true;
 
     try {
         const token = userData1.access_token;
-        const response = await axios.delete(URL + 'eliminar-estudiante/' + idEstudiante.value, {
+        const response = await axios.delete(URL + 'eliminar-usuario/' + idUsuario.value, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             }
         });
-        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Estudiante eliminado con exito`, life: 10000 });
+        toast.add({ severity: 'success', summary: 'Eliminado con exito', detail: `Usuario eliminado con exito`, life: 10000 });
         verCargandoSpiner.value = false;
-        consultarEstudiantes();
+        consultarUsuarios();
     } catch (error) {
         console.log(error);
         const errorMessage = error?.response?.data?.msg || 'Error desconocido'; // Mensaje por defecto
@@ -427,27 +520,27 @@ const eliminarEstudianteServidor = async () => {
         <div class="card" v-if="grados && sedes">
             <Toolbar class="mb-1">
                 <template #start>
-                    <Button label="Crear estudiante" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalEstudiante" />
+                    <Button label="Crear usuario" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalUsuarios" />
                 </template>
             </Toolbar>
 
             <DataTable
-                v-if="estudiantes.length > 0"
+                v-if="usuarios.length > 0"
                 ref="dt"
                 v-model:selection="selectedProducts"
-                :value="estudiantes"
+                :value="usuarios"
                 dataKey="id"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} exámenes"
+                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
                 size="small"
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
-                        <h4 class="m-0">Registro de estudiantes</h4>
+                        <h4 class="m-0">Registro de usuarios</h4>
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -462,12 +555,13 @@ const eliminarEstudianteServidor = async () => {
                 <Column field="segundo_apellido" header="Segundo Apellido" sortable style="min-width: 2rem"></Column>
                 <Column field="primer_nombre" header="Primer Nombre" sortable style="min-width: 2rem"></Column>
                 <Column field="segundo_nombre" header="Primer Apellido" sortable style="min-width: 2rem"></Column>
+                <Column field="roles_str" header="Rol" sortable style="min-width: 2rem"></Column>
                 <Column field="created_at" header="Fecha Creación" sortable style="min-width: 2rem"></Column>
-                <Column field="grado.grado" header="Grado" sortable style="min-width: 2rem">
-                    <template #body="slotProps"> {{ slotProps.data.grado.grado }}° - {{ slotProps.data.grado.salon }} </template>
-                </Column>
-                <Column field="sede.nombre" header="Sede" sortable style="min-width: 2rem">
-                    <template #body="slotProps"> {{ slotProps.data.sede.nombre }} </template>
+                <Column field="grado_str" header="Grado" sortable style="min-width: 2rem"></Column>
+                <Column field="sede_str" header="Sede" sortable style="min-width: 2rem">
+                    <template #body="slotProps">
+                        {{ slotProps.data.sede_str }}
+                    </template>
                 </Column>
                 <Column field="estado" header="Estado" sortable style="min-width: 12rem">
                     <template #body="slotProps">
@@ -478,20 +572,25 @@ const eliminarEstudianteServidor = async () => {
                 <Toast />
                 <Column :exportable="false" style="min-width: 12rem" header="Acciones">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar estudiante', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarExamen(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar estudiante', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarEstudiante(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-tooltip="{ value: 'Editar usuario', showDelay: 0, hideDelay: 0 }" @click="abrirModalEditarUsuario(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" v-tooltip="{ value: 'Eliminar usuario', showDelay: 0, hideDelay: 0 }" @click="confirmarEliminarUsuario(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="verModalCrearEstudiante" :style="{ width: '750px' }" :header="headerModalEstudiante" :modal="true" :draggable="false" @hide="ocultarModalCrearEstudiante">
+        <Dialog v-model:visible="verModalCrearUsuario" :style="{ width: '80%' }" :header="headerModalUsuario" :modal="true" :draggable="false" @hide="ocultarModalCrearUsuario">
             <div class="flex flex-col gap-6">
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
                         <label for="name" class="block font-bold mb-3">Rol</label>
                         <Select v-if="sedes" v-model="rolSeleccionado" :options="roles" optionLabel="name" placeholder="Seleccione un rol" fluid />
                         <small v-if="submitted && !rolSeleccionado" class="text-red-500">Debe seleccionar un rol</small>
+                    </div>
+                    <div v-if="rolSeleccionado && rolSeleccionado.code == 'profesor'" class="col-span-6">
+                        <label for="materias" class="block font-bold mb-3">Materias</label>
+                        <MultiSelect v-if="materias" v-model="materiasSeleccionadas" :options="materias" optionLabel="name" placeholder="Seleccione una o varias materias" class="w-full" />
+                        <small v-if="submitted && (!materiasSeleccionadas || !materiasSeleccionadas.length)" class="text-red-500"> Debe seleccionar al menos una materia </small>
                     </div>
                     <div v-if="rolSeleccionado && rolSeleccionado.code == 'estudiante'" class="col-span-6">
                         <label for="name" class="block font-bold mb-3">Grado</label>
@@ -540,29 +639,29 @@ const eliminarEstudianteServidor = async () => {
                         <span class="block font-bold mb-4">Estado</span>
                         <div class="grid grid-cols-6 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <RadioButton id="estadoActivo" v-model="estadoEstudiante" name="estado" value="activo" />
+                                <RadioButton id="estadoActivo" v-model="estadoUsuario" name="estado" value="activo" />
                                 <label for="estadoActivo">Activo</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <RadioButton id="estadoInactivo" v-model="estadoEstudiante" name="estado" value="inactivo" />
+                                <RadioButton id="estadoInactivo" v-model="estadoUsuario" name="estado" value="inactivo" />
                                 <label for="estadoInactivo">Inactivo</label>
                             </div>
-                            <small v-if="submitted && !estadoEstudiante" class="text-red-500">El estado es requerido</small>
+                            <small v-if="submitted && !estadoUsuario" class="text-red-500">El estado es requerido</small>
                         </div>
                     </div>
                 </div>
             </div>
             <template #footer>
                 <Toast />
-                <Button label="Cancelar" icon="pi pi-times" text @click="ocultarModalCrearEstudiante" />
-                <Button v-if="!editarEstudiante" label="Guardar" icon="pi pi-check" @click="guardarEstudiante" />
-                <Button v-if="editarEstudiante" label="Editar" icon="pi pi-check" @click="editarEstudiante2" />
+                <Button label="Cancelar" icon="pi pi-times" text @click="ocultarModalCrearUsuario" />
+                <Button v-if="!editarUsuario" label="Guardar" icon="pi pi-check" @click="guardarUsuario" />
+                <Button v-if="editarUsuario" label="Editar" icon="pi pi-check" @click="editarUsuario2" />
             </template>
         </Dialog>
     </div>
-    <Cargando v-if="verCargandoSpiner" />
+    <Cargando v-if="usuarios.length == 0 && verCargandoSpiner" />
 
-    <div v-if="!estudiantes.length && !verCargandoSpiner" class="card flex items-center justify-center my-4">
+    <div v-if="usuarios.length == 0 && !verCargandoSpiner" class="card flex items-center justify-center my-4">
         <div class="p-card p-m-4">
             <p class="font-bold text-xl text-center">Sin información</p>
         </div>

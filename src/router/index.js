@@ -26,9 +26,9 @@ const router = createRouter({
                     meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
                 },
                 {
-                    path: '/gestionar-estudiantes',
-                    name: 'gestionar-estudiantes',
-                    component: () => import('@/views/GestionarEstudiante.vue'),
+                    path: '/gestionar-usuarios',
+                    name: 'gestionar-usuarios',
+                    component: () => import('@/views/GestionarUsuario.vue'),
                     meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
                 },
                 {

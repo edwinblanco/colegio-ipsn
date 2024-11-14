@@ -88,21 +88,10 @@ const logout = async () => {
                 </button>
             </div>
 
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content">
-                    <!--<button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>-->
-                    <button type="button" class="layout-topbar-action" @click="confirmarCerrarSesion($event)" v-tooltip="{ value: 'Cerrar sesión', showDelay: 0, hideDelay: 0 }">
-                        <i class="pi pi-power-off"></i>
-                        <span>Cerrar sesión</span>
-                    </button>
-                </div>
+            <div class="layout-config-menu">
+                <button type="button" class="layout-topbar-action" @click="confirmarCerrarSesion($event)" v-tooltip="{ value: 'Cerrar sesión', showDelay: 0, hideDelay: 0 }">
+                    <i class="pi pi-power-off"></i>
+                </button>
             </div>
         </div>
     </div>
