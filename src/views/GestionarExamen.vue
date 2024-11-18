@@ -12,6 +12,7 @@ import Cargando from './Componentes/Cargando.vue';
 import PreguntasModal from './Componentes/PreguntasModal.vue';
 
 const userData1 = store.getters['auth/getUser'];
+const esProfesor = userData1.user.roles.some(rol => rol.name === 'profesor');
 const isAuthenticated1 = store.getters['auth/isAuthenticated'];
 const verModalPreguntas = ref(false);
 
@@ -398,16 +399,13 @@ const eliminarExamenServidor = async () => {
 
 <template>
     <div v-if="isAuthenticated1">
-        <!--<p>Bienvenid@, {{ userData1.user.primer_nombre }} {{ userData1.user.primer_apellido }}</p>-->
-    </div>
-    <div v-else>
-        <p>No estás autenticado.</p>
+        <p>Bienvenid@, {{ userData1.user.primer_nombre }} {{ userData1.user.roles }}</p>
     </div>
     <div>
         <div class="card" v-if="materias">
             <Toolbar class="mb-1">
                 <template #start>
-                    <Button label="Crear examen" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalExamen" />
+                    <Button v-if="esProfesor" label="Crear examen" icon="pi pi-plus" severity="secondary" class="mr-2" @click="abrirModalExamen" />
                 </template>
             </Toolbar>
 

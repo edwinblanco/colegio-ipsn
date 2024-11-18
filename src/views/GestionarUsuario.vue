@@ -415,10 +415,14 @@ const abrirModalEditarUsuario = (usuario) => {
 
     if (usuario.roles.some((obj) => obj.name === 'estudiante')) {
         rolSeleccionado.value = { name: 'estudiante', code: 'estudiante' };
-        let grado = { name: usuario.grado.grado + ' - ' + usuario.grado.salon, code: usuario.grado.id };
-        let sede = { name: usuario.sede.nombre, code: usuario.sede.id };
-        gradoSeleccionado.value = grado;
-        sedeSeleccionada.value = sede;
+        if (usuario.grado) {
+            let grado = { name: usuario.grado.grado + ' - ' + usuario.grado.salon, code: usuario.grado.id };
+            gradoSeleccionado.value = grado;
+        }
+        if (usuario.sede) {
+            let sede = { name: usuario.sede.nombre, code: usuario.sede.id };
+            sedeSeleccionada.value = sede;
+        }
     }
 
     if (usuario.roles.some((obj) => obj.name === 'profesor')) {
@@ -659,7 +663,7 @@ const eliminarUsuarioServidor = async () => {
             </template>
         </Dialog>
     </div>
-    <Cargando v-if="usuarios.length == 0 && verCargandoSpiner" />
+    <Cargando v-if="verCargandoSpiner" />
 
     <div v-if="usuarios.length == 0 && !verCargandoSpiner" class="card flex items-center justify-center my-4">
         <div class="p-card p-m-4">

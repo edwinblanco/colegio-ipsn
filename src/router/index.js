@@ -32,9 +32,39 @@ const router = createRouter({
                     meta: { requiresAuth: true, roles: ['admin', 'profesor'] }
                 },
                 {
+                    path: '/gestionar-grados',
+                    name: 'gestionar-grados',
+                    component: () => import('@/views/GestionarGrados.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
+                    path: '/gestionar-sedes',
+                    name: 'gestionar-sedes',
+                    component: () => import('@/views/GestionarSedes.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
+                    path: '/gestionar-materias',
+                    name: 'gestionar-materias',
+                    component: () => import('@/views/GestionarMaterias.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
                     path: '/conf-imagenes-principales',
                     name: 'config-imagenes-principales',
                     component: () => import('@/views/Configuracion/ImagenesPrincipales.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
+                    path: '/conf-anuncios-principales',
+                    name: 'conf-anuncios-principales',
+                    component: () => import('@/views/Configuracion/Anuncios.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
+                    path: '/conf-galeria-principales',
+                    name: 'conf-galeria-principales',
+                    component: () => import('@/views/Configuracion/Galeria.vue'),
                     meta: { requiresAuth: true, roles: ['admin'] }
                 }
             ]

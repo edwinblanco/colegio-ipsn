@@ -11,13 +11,18 @@ const model = ref([
         items: [
             { label: 'Panel Estudiante', icon: 'pi pi-fw pi-home', to: '/panel-estudiante' },
             { label: 'Gestionar Examen', icon: 'pi pi-fw pi-file-edit', to: '/gestionar-examen' },
-            { label: 'Gestionar Usuarios', icon: 'pi pi-fw pi-users', to: '/gestionar-usuarios' }
+            { label: 'Gestionar Usuarios', icon: 'pi pi-fw pi-users', to: '/gestionar-usuarios' },
+            { label: 'Gestionar Grados', icon: 'pi pi-sitemap', to: '/gestionar-grados' },
+            { label: 'Gestionar Sedes', icon: 'pi pi-map-marker', to: '/gestionar-sedes' },
+            { label: 'Gestionar Materias', icon: 'pi pi-book', to: '/gestionar-materias' },
         ]
     },
     {
         label: 'Configuración',
         items: [
             { label: 'Imagenes principales', icon: 'pi pi-fw pi-id-card', to: '/conf-imagenes-principales' },
+            { label: 'Noticas - Anuncios', icon: 'pi pi-fw pi-bell', to: '/conf-anuncios-principales' },
+            { label: 'Galería', icon: 'pi pi-camera', to: '/conf-galeria-principales' },
         ]
     }
 ]);
@@ -33,6 +38,12 @@ const filteredModel = computed(() => {
                 // permisos para administrador
                 if (usuario.value.includes('admin') && item.label == 'Imagenes principales') return true; // El admin ve todo Imagenes principales
                 if (usuario.value.includes('admin') && item.label == 'Gestionar Usuarios') return true;
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Examen') return true;
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Grados') return true;
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Sedes') return true;
+                if (usuario.value.includes('admin') && item.label == 'Gestionar Materias') return true;
+                if (usuario.value.includes('admin') && item.label == 'Noticas - Anuncios') return true;
+                if (usuario.value.includes('admin') && item.label == 'Galería') return true;
                 //if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
 
                 // permisos para profesor
