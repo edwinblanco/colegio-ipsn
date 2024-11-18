@@ -23,6 +23,7 @@ const model = ref([
             { label: 'Imagenes principales', icon: 'pi pi-fw pi-id-card', to: '/conf-imagenes-principales' },
             { label: 'Noticas - Anuncios', icon: 'pi pi-fw pi-bell', to: '/conf-anuncios-principales' },
             { label: 'Galería', icon: 'pi pi-camera', to: '/conf-galeria-principales' },
+            { label: 'Artículos  - Libros', icon: 'pi pi-book', to: '/conf-articulos-principales' },
         ]
     }
 ]);
@@ -44,6 +45,7 @@ const filteredModel = computed(() => {
                 if (usuario.value.includes('admin') && item.label == 'Gestionar Materias') return true;
                 if (usuario.value.includes('admin') && item.label == 'Noticas - Anuncios') return true;
                 if (usuario.value.includes('admin') && item.label == 'Galería') return true;
+                if (usuario.value.includes('admin') && item.label == 'Artículos  - Libros') return true; 
                 //if (usuario.value.includes('profesor') && item.label == 'Gestionar Examen') return true;
 
                 // permisos para profesor

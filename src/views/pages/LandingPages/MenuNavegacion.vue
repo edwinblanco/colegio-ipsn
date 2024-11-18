@@ -2,7 +2,7 @@
 
 <template>
     <div class="py-3 px-3 fixed top-0 left-0 w-full z-50 bg-surface-0 dark:bg-surface-900 shadow-lg">
-        <div class="mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between">
+        <div class="mx-0 lg:px-20 flex items-center justify-between">
             <router-link to="/" class="flex items-center hover:opacity-80 transition-opacity duration-300">
                 <img src="https://p.plataformaintegra.net/ipsnb/img/colegio/escudo_auth.jpg" alt="Descripción de la imagen" class="h-12 mr-5" />
                 <span class="text-surface-900 dark:text-surface-0 font-medium text-2xl leading-normal mr-20">IEPSN</span>
@@ -62,11 +62,10 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="relative group">
+                   <!--<li class="relative group">
                         <a class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl hover:text-primary transition-colors duration-300">
                             <span>Admisiones</span>
                         </a>
-                        <!-- Submenú -->
                         <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
                                 <router-link to="admisiones#requisitos-inscripcion" class="block text-surface-900 dark:text-surface-0">Requisitos de inscripción</router-link>
@@ -86,7 +85,6 @@
                         <a class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl hover:text-primary transition-colors duration-300">
                             <span>Academia</span>
                         </a>
-                        <!-- Submenú -->
                         <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
                                 <router-link to="academia#programas-niveles" class="block text-surface-900 dark:text-surface-0">Programas y niveles educativos</router-link>
@@ -101,10 +99,10 @@
                                 <router-link to="academia#calendario-academico" class="block text-surface-900 dark:text-surface-0">Calendario académico</router-link>
                             </li>
                         </ul>
-                    </li>
+                    </li>-->
                     <li class="relative group">
                         <a class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl hover:text-primary transition-colors duration-300">
-                            <span>Noticias y eventos</span>
+                            <span>Noticias</span>
                         </a>
                         <!-- Submenú -->
                         <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
@@ -128,14 +126,11 @@
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
                                 <router-link to="galeria#fotos-eventos" class="block text-surface-900 dark:text-surface-0">Fotos de eventos y actividades</router-link>
                             </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="galeria#videos" class="block text-surface-900 dark:text-surface-0">Videos</router-link>
-                            </li>
                         </ul>
                     </li>
                     <li class="relative group">
                         <a class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl hover:text-primary transition-colors duration-300">
-                            <span>Blog</span>
+                            <span>Blog - Biblioteca</span>
                         </a>
                         <!-- Submenú -->
                         <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
@@ -143,24 +138,7 @@
                                 <router-link to="blog#articulos-educativos" class="block text-surface-900 dark:text-surface-0">Artículos sobre temas educativos</router-link>
                             </li>
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="blog#contribuciones" class="block text-surface-900 dark:text-surface-0">Contribuciones de estudiantes y profesores</router-link>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="relative group">
-                        <a class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl hover:text-primary transition-colors duration-300">
-                            <span>Biblioteca</span>
-                        </a>
-                        <!-- Submenú -->
-                        <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="biblioteca#catalogo-recursos" class="block text-surface-900 dark:text-surface-0">Catálogo de libros y recursos disponibles</router-link>
-                            </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="biblioteca#horarios-biblioteca" class="block text-surface-900 dark:text-surface-0">Horarios de la biblioteca</router-link>
-                            </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="biblioteca#recursos-en-linea" class="block text-surface-900 dark:text-surface-0">Recursos en línea</router-link>
+                                <router-link to="blog#contribuciones" class="block text-surface-900 dark:text-surface-0">Libros</router-link>
                             </li>
                         </ul>
                     </li>
@@ -212,7 +190,6 @@
                 </ul>
                 <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
                     <Button label="Ingresar" text as="router-link" to="/auth/login" rounded></Button>
-                    <Button label="Registrarme" to="/" rounded></Button>
                 </div>
             </div>
         </div>

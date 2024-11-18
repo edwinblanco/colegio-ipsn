@@ -66,6 +66,12 @@ const router = createRouter({
                     name: 'conf-galeria-principales',
                     component: () => import('@/views/Configuracion/Galeria.vue'),
                     meta: { requiresAuth: true, roles: ['admin'] }
+                },
+                {
+                    path: '/conf-articulos-principales',
+                    name: 'conf-articulos-principales',
+                    component: () => import('@/views/Configuracion/Articulo.vue'),
+                    meta: { requiresAuth: true, roles: ['admin'] }
                 }
             ]
         },
