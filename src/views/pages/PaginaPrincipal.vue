@@ -2,7 +2,6 @@
 import Academia from './LandingPages/Academia.vue';
 import Adminisiones from './LandingPages/Adminisiones.vue';
 import Alumnos from './LandingPages/Alumnos.vue';
-import Biblioteca from './LandingPages/Biblioteca.vue';
 import Blog from './LandingPages/Blog.vue';
 import Contacto from './LandingPages/Contacto.vue';
 import Footer from './LandingPages/Footer.vue';

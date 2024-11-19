@@ -116,11 +116,6 @@ const router = createRouter({
                     component: () => import('@/views/pages/LandingPages/Blog.vue')
                 },
                 {
-                    path: '/biblioteca',
-                    name: 'biblioteca',
-                    component: () => import('@/views/pages/LandingPages/Biblioteca.vue')
-                },
-                {
                     path: '/alumnos',
                     name: 'alumnos',
                     component: () => import('@/views/pages/LandingPages/Alumnos.vue')
