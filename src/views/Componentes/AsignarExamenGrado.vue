@@ -198,7 +198,7 @@ const consultarAsignaciones = async () => {
 
         if(response.data.status !== 0){
             response.data.data.map((num, index) => {
-                let asignacion = { name: num.nombre_grado, code: index, fechaAsig: num.fecha_asignacion, sede: num.sede.nombre };
+                let asignacion = { name: num.nombre_grado, code: index, fechaAsig: num.fecha_asignacion, sede: num.sede.nombre, examenId: props.examen.code, gradoId:num.grado_id };
                 asignacionesList.push(asignacion);
             });
 

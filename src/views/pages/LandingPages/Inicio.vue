@@ -6,7 +6,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const images = ref(['/images/principal.jpeg', '/images/principal2.jpg', '/images/principal3.jpg']);
 
 const currentImage = ref(0);
-const imagenes = ref([]);
+const imagenes = ref(['/images/principal.jpeg', '/images/principal2.jpg', '/images/principal3.jpg']);
 let interval;
 
 onMounted(() => {

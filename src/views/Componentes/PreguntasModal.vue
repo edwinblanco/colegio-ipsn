@@ -365,6 +365,7 @@ const mostrarModalCrearPreguntaf = () => {
     enunciado.value = null;
     valor.value = null;
     voyAcrearOpcion.value = true;
+    voyAcrearPregunta.value = true;
 };
 
 const guardarOpcionServidor = async () => {
