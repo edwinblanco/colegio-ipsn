@@ -398,9 +398,6 @@ const eliminarExamenServidor = async () => {
 </script>
 
 <template>
-    <div v-if="isAuthenticated1">
-        <p>Bienvenid@, {{ userData1.user.primer_nombre }}</p>
-    </div>
     <div>
         <div class="card" v-if="materias">
             <Toolbar class="mb-1">

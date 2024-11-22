@@ -82,6 +82,18 @@ const logout = async () => {
         </div>
 
         <div class="layout-topbar-actions">
+
+            <div 
+                v-if="isAuthenticated1" 
+                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-md flex items-center"
+            >
+                <p class="text-sm font-medium">
+                    <span class="font-semibold"><b>Bienvenid@:</b></span> 
+                    {{ userData1.user.primer_nombre }} {{ userData1.user.primer_apellido }} 
+                    <span class="text-gray-600 italic">({{ userData1.user.roles[0].name }})</span>
+                </p>
+            </div>
+
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>

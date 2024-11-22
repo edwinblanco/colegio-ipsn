@@ -3,11 +3,11 @@ import router from './router';
 
 //const URL = 'http://localhost/proyectoBackCPSN/public/api/'; // Para la casa
 //const URL = 'http://localhost/colegio-ipsn-back/public/api/'; // Para el trabajo
-const URL = 'https://coral-toad-721622.hostingersite.com/api/';
+const URL = 'https://iepsn-back.online/api/';
 
 //const DOMINIO = 'http://localhost/proyectoBackCPSN/public/';
 //const DOMINIO = 'http://localhost/colegio-ipsn-back/public/';
-const DOMINIO = 'https://coral-toad-721622.hostingersite.com/';
+const DOMINIO = 'https://iepsn-back.online/';
 
 const validarToken = async (userData) => {
     if (!userData) {
