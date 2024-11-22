@@ -145,12 +145,6 @@ const convertirAFechaMySQL = (fechaISO) => {
 </script>
 
 <template>
-    <div v-if="isAuthenticated1">
-        <!--<p>Bienvenid@, {{ userData1.user.primer_nombre }} {{ userData1.user.primer_apellido }}</p>-->
-    </div>
-    <div v-else>
-        <p>No estás autenticado.</p>
-    </div>
     <div class="card" v-if="cargandoComponente">
         <div class="rounded border border-surface-200 dark:border-surface-700 p-6 bg-surface-0 dark:bg-surface-900">
             <div class="flex mb-4">

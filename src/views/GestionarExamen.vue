@@ -7,8 +7,8 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 import AsignarExamenGrado from './Componentes/AsignarExamenGrado.vue';
-import InfromeExamenEstudiantes from './Componentes/InfromeExamenEstudiantes.vue';
 import Cargando from './Componentes/Cargando.vue';
+import InfromeExamenEstudiantes from './Componentes/InfromeExamenEstudiantes.vue';
 import PreguntasModal from './Componentes/PreguntasModal.vue';
 
 const userData1 = store.getters['auth/getUser'];
@@ -397,6 +397,7 @@ const eliminarExamenServidor = async () => {
 };
 </script>
 
+
 <template>
     <div>
         <div class="card" v-if="materias">
@@ -406,13 +407,15 @@ const eliminarExamenServidor = async () => {
                 </template>
             </Toolbar>
 
-            <Tabs>
-                <TabList>
-                    <Tab v-for="materia in materias" :key="materia.name" :value="String(materia.code)" @click="consultarExamenes(materia.code)">
-                        <i class="pi pi-book mr-1" /> <span>{{ materia.name }}</span>
-                    </Tab>
-                </TabList>
-            </Tabs>
+            <div class="card p-0">
+                <Tabs scrollable>
+                    <TabList>
+                        <Tab v-for="materia in materias" :key="materia.name" :value="String(materia.code)" @click="consultarExamenes(materia.code)">
+                            <i class="pi pi-book mr-1" /> <span>{{ materia.name }}</span>
+                        </Tab>
+                    </TabList>
+                </Tabs>
+            </div>
 
             <DataTable
                 v-if="examenes.length > 0"

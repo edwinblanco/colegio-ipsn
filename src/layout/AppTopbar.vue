@@ -85,11 +85,11 @@ const logout = async () => {
 
             <div 
                 v-if="isAuthenticated1" 
-                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-md flex items-center"
+                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-md flex items-center hidden sm:flex"
             >
                 <p class="text-sm font-medium">
                     <span class="font-semibold"><b>Bienvenid@:</b></span> 
-                    {{ userData1.user.primer_nombre }} {{ userData1.user.primer_apellido }} 
+                    {{ userData1.user.primer_nombre }} {{ userData1.user.primer_apellido }}
                     <span class="text-gray-600 italic">({{ userData1.user.roles[0].name }})</span>
                 </p>
             </div>
