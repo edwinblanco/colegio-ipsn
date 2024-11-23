@@ -46,19 +46,10 @@
                         <!-- Submenú -->
                         <ul class="absolute left-0 top-full mt-2 bg-white dark:bg-surface-700 rounded shadow-lg hidden group-hover:block min-w-max z-10">
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="sobre-nosotros#historia" class="block text-surface-900 dark:text-surface-0">Historia</router-link>
-                            </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
                                 <router-link to="sobre-nosotros#filosofia" class="block text-surface-900 dark:text-surface-0">Filosofía</router-link>
                             </li>
                             <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="sobre-nosotros#equipo-directivo" class="block text-surface-900 dark:text-surface-0">Equipo directivo y profesores</router-link>
-                            </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <router-link to="sobre-nosotros#instalaciones" class="block text-surface-900 dark:text-surface-0">Instalaciones</router-link>
-                            </li>
-                            <li class="px-4 py-2 hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors whitespace-nowrap">
-                                <a href="/public/files/MANUAL_DE_CONVIVENCIA.pdf" target="_blank" class="block text-surface-900 dark:text-surface-0">MANUAL DE CONVIVENCIA</a>
+                                <a href="https://iepsn-back.online/storage/MANUAL_DE_CONVIVENCIA.pdf" target="_blank" class="block text-surface-900 dark:text-surface-0">MANUAL DE CONVIVENCIA</a>
                             </li>
                         </ul>
                     </li>
